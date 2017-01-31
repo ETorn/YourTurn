@@ -1,0 +1,25 @@
+{
+  "name": "YourTurn",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/VictorPuig/YourTurn.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/VictorPuig/YourTurn/issues"
+  },
+  "homepage": "https://github.com/VictorPuig/YourTurn",
+  "dependencies": {
+    "body-parser": "^1.16.0",
+    "express": "^4.14.1",
+    "mongoose": "^4.8.1"
+  }
+}
