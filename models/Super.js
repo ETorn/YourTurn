@@ -11,4 +11,5 @@ var SuperSchema   = new Schema({
     //coordinates: String
 });
 
-module.exports = mongoose.model('Super', SuperSchema);
+var SuperModel = mongoose.model('Super', SuperSchema);
+module.exports = SuperModel;

@@ -3,7 +3,8 @@ var Schema       = mongoose.Schema;
 
 var StoreSchema   = new Schema({
     name: String,
-    users: [{type: Schema.ObjectId, ref: "User"}]
+    currentTurn: Number,
+    //users: [{type: Schema.ObjectId, ref: "User"}] TODO Fase 3
     //idqr: String
 });
 

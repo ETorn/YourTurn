@@ -23,7 +23,7 @@ app.use(bodyParser.json());
 var router = express.Router();              // get an instance of the express Router
 
 // REGISTER OUR ROUTES -------------------------------
-require ('./routes/users.js') (router);
+//require ('./routes/users.js') (router); No és neccessari per a la opció bàsica TODO Fase 3
 require ('./routes/stores.js') (router);
 require ('./routes/supers.js') (router);
 app.use('/', router);
