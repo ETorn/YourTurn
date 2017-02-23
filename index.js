@@ -1,6 +1,8 @@
 // BASE SETUP
 // =============================================================================
 
+var config = require('./config');
+
 // Require dependencies
 var User       = require('./models/User');
 var Super      = require('./models/Super');
@@ -9,7 +11,7 @@ var express    = require('express');
 var app        = express();
 
 var mongoose   = require('mongoose');
-mongoose.connect('mongodb://127.0.0.1/yourturn');
+mongoose.connect('mongodb://' + config.mongodb.address + '/yourturn');
 
 
 // configure app to use bodyParser()
