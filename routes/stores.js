@@ -107,13 +107,13 @@ module.exports = function(router) {
         });
     });
 
-    router.route('/stores/:store_id/usersTurn')
+    router.route('/stores/:store_id/queue')
     .get(function(req, res){
       Store.findById(req.params.store_id, function(err, foundStore) {
         if (err)
           return res.send(err);
 
-        res.json({userTurn: foundStore.usersTurn});
+        res.json({queue: foundStore.users.length});
         });
     })
 

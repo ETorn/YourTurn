@@ -7,11 +7,11 @@ router.route('/users')
   .post(function(req, res) {
     var user = new User();      // create a new instance of the User model
       // save the user and check for errors
-      user.save(function(err) {
+      user.save(function(err, u) {
         if (err)
           return res.send(err);
 
-        res.json({ message: 'User created!' });
+        res.json({ message: 'User created!', userId: u.id});
       });
   })
   .get(function(req, res) {
