@@ -6,6 +6,7 @@ module.exports = function(router) {
     .post(function(req, res) {
       var store = new Store();
 <<<<<<< HEAD
+<<<<<<< HEAD
         store.name = req.body.name;
         store.storeTurn = 1;
         store.usersTurn = 1;
@@ -37,6 +38,28 @@ module.exports = function(router) {
                   return res.send(err);
 >>>>>>> origin/master
 
+=======
+      if (req.body.name)
+        store.name = req.body.name;
+        
+      store.currentTurn = 0;
+
+      //store.users = []; TODO Fase 3
+
+        // save the user and check for errors
+        Store.findOne({name : store.name}, function (err, storeM) {
+            console.log(storeM);
+            if(err)
+              console.log(err);
+            if (storeM){
+              return res.json({message: 'This store already exists'});
+            }else{
+              // save the super and check for errors
+              store.save(function(err, newStore) {
+                if (err)
+                  return res.send(err);
+
+>>>>>>> origin/master
                 res.json({ message: 'Store created!', id: newStore.id});
               });
             }
@@ -84,6 +107,7 @@ module.exports = function(router) {
         });
     });
 
+<<<<<<< HEAD
 <<<<<<< HEAD
     router.route('/stores/:store_id/users/:user_id')
      .post(function(req, res){
@@ -149,6 +173,8 @@ module.exports = function(router) {
         });
       })
 =======
+=======
+>>>>>>> origin/master
   /*router.route('/stores/:store_id/addUser/:user_id') TODO Fase 3
     .post(function(req, res) {
       // save the user and check for errors
@@ -169,5 +195,8 @@ module.exports = function(router) {
         res.json({ message: 'User in store successfully deleted' });
       });
     });*/
+<<<<<<< HEAD
+>>>>>>> origin/master
+=======
 >>>>>>> origin/master
 }

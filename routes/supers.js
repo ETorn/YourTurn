@@ -1,6 +1,7 @@
 //User Routes
 module.exports = function(router) {
   var Super = require('../models/Super');
+<<<<<<< HEAD
 
 <<<<<<< HEAD
 router.route('/users')
@@ -37,6 +38,35 @@ router.route('/users')
                 return res.send(err);
 >>>>>>> origin/master
 
+=======
+
+  router.route('/supers')
+    .post(function(req, res) {
+      var superM = new Super();
+      if (req.body.name)
+        superM.name = req.body.name;
+      if (req.body.address)
+        superM.address = req.body.address;
+      if (req.body.phone)
+        superM.phone = req.body.phone;
+      if (req.body.fax)
+        superM.fax = req.body.fax;
+
+        superM.stores = [];
+
+      Super.findOne({name : superM.name, address: superM.address}, function (err, superMrk) {
+          console.log(superMrk);
+          if(err)
+            console.log(err);
+          if (superMrk){
+            return res.json({message: 'This super already exists'});
+          }else{
+            // save the super and check for errors
+            superM.save(function(err, newSuper) {
+              if (err)
+                return res.send(err);
+
+>>>>>>> origin/master
               res.json({ message: 'Super created!', id: newSuper.id});
             });
           }
