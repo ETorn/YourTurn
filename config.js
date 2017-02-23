@@ -4,5 +4,8 @@ module.exports = {
   },
   node: {
     address: "http://localhost:8080"
+  },
+  stores: {
+    maxTurn: 99
   }
 };

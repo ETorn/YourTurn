@@ -1,4 +1,6 @@
 
+var config = require('../config');
+
 module.exports = function(router) {
   var Store = require('../models/Store');
 
@@ -79,14 +81,18 @@ module.exports = function(router) {
       {safe: true, upsert: true, new : true}, function (err, foundStore){
         if (err)
           return res.send(err);
+
         var userTurn = foundStore.usersTurn;
         foundStore.usersTurn++;
+
+        if (foundStore.usersTurn > config.stores.maxTurn)
+          foundStore.usersTurn = 1;
 
         foundStore.save(function(err) {
           if (err)
             return res.send(err);
 
-          res.json({ message: 'User created in store!',  turn: userTurn});
+          res.json({ message: 'User added to store queue!',  turn: userTurn});
         });
       });
     })
@@ -125,6 +131,9 @@ module.exports = function(router) {
         if (err)
           return res.send(err);
         foundStore.storeTurn++;
+
+        if (foundStore.storeTurn > config.stores.maxTurn)
+          foundStore.storeTurn = 1;
 
         foundStore.save(function(err) {
           if (err)
