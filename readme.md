@@ -16,8 +16,11 @@ YourTurnServer
 + GET /stores/:store_id -> Retorna la parada corresponent a la id
 + PUT /stores/:store_id -> Modifica la parada
 + DELETE /stores/:store_id -> Elimina la parada
-+ POST /stores/:store_id/addUser/:user_id -> Afegeix un usuari a la cua de la parada
-+ DELETE /stores/:store_id/addUser/:user_id -> Elimina un usuari de la cua.
++ POST /stores/:store_id/users/:user_id -> Afegeix un usuari a la cua de la parada i retorna el torn de l'usuari
++ DELETE /stores/:store_id/users/:user_id -> Elimina un usuari de la cua
++ GET /stores/:store_id/getQueue -> Retorna la cua actual d'aquesta parada
++ PUT /stores/:store_id/advanceTurn -> Avança el torn de la parada
++ GET /stores/:store_id/getCurrentTurn -> Retorna el torn actual de la parada
 
 ### Supers
 + GET /supers -> Llista supers
