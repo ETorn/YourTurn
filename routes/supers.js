@@ -1,8 +1,7 @@
 //User Routes
 module.exports = function(router) {
   var Super = require('../models/Super');
-
-<<<<<<< HEAD
+  
   router.route('/supers')
     .post(function(req, res) {
       var superM = new Super();
@@ -28,15 +27,6 @@ module.exports = function(router) {
             superM.save(function(err, newSuper) {
               if (err)
                 return res.send(err);
-=======
-router.route('/users')
-  // create a user (accessed at POST http://localhost:8080/users)
-  .post(function(req, res) {
-    var user = new User();      // create a new instance of the User model
-      user.turn = req.body.turn;  // set the users turn (comes from the request)
-      user.date = req.body.date;
->>>>>>> Routes completed
-
               res.json({ message: 'Super created!', id: newSuper.id});
             });
           }
