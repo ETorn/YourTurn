@@ -1,65 +1,101 @@
 //User Routes
 module.exports = function(router) {
   var Super = require('../models/Super');
-  var Store = require('../models/Store');
 
+<<<<<<< HEAD
 router.route('/users')
   // create a user (accessed at POST http://localhost:8080/users)
   .post(function(req, res) {
     var user = new User();      // create a new instance of the User model
       user.turn = req.body.turn;  // set the users turn (comes from the request)
       user.date = req.body.date;
+=======
+  router.route('/supers')
+    .post(function(req, res) {
+      var superM = new Super();
+      if (req.body.name)
+        superM.name = req.body.name;
+      if (req.body.address)
+        superM.address = req.body.address;
+      if (req.body.phone)
+        superM.phone = req.body.phone;
+      if (req.body.fax)
+        superM.fax = req.body.fax;
 
-      // save the user and check for errors
-      user.save(function(err) {
+        superM.stores = [];
+
+      Super.findOne({name : superM.name, address: superM.address}, function (err, superMrk) {
+          console.log(superMrk);
+          if(err)
+            console.log(err);
+          if (superMrk){
+            return res.json({message: 'This super already exists'});
+          }else{
+            // save the super and check for errors
+            superM.save(function(err, newSuper) {
+              if (err)
+                return res.send(err);
+>>>>>>> origin/master
+
+              res.json({ message: 'Super created!', id: newSuper.id});
+            });
+          }
+      });
+    })
+    .get(function(req, res) {
+      Super.find(function(err, supers) {
         if (err)
           return res.send(err);
 
-        res.json({ message: 'User created!' });
+        res.json(supers);
       });
-  })
-  .get(function(req, res) {
-    User.find(function(err, users) {
-      if (err)
-        return res.send(err);
-
-      res.json(users);
     });
-  });
 
-router.route('/users/:user_id')
-  // get the user with that id (accessed at GET http://localhost:8080/users/:user_id)
-  .get(function(req, res) {
-    User.findById(req.params.user_id, function(err, user) {
-      if (err)
-        return res.send(err);
-
-      res.json(user);
-      });
-  })
-  .put(function(req, res) {
-  // use our user model to find the bear we want
-    User.findById(req.params.user_id, function(err, user) {
-      if (err)
-        return res.send(err);
-      user.name = req.body.name;  // update the user info
-      // save the user
-      user.save(function(err) {
+  router.route('/supers/:super_id')
+    .get(function(req, res) {
+      Super.findById(req.params.super_id, function(err, superM) {
         if (err)
           return res.send(err);
 
-        res.json({ message: 'user updated!' });
+        res.json(superM);
+        });
+    })
+    .put(function(req, res) {
+      var superUpdated = {};
+
+      if (req.body.phone)
+        superUpdated.phone = req.body.phone;
+      if (req.body.fax)
+        superUpdated.fax = req.body.fax;
+      if (req.body.stores)
+        superUpdated.stores = req.body.stores;
+
+      // update the super
+      Super.update({_id: req.params.super_id}, superUpdated, function (err, raw){
+        if (err)
+          return res.send(err);
+
+        res.json({ message: 'Super updated!' });
       });
+    })
+    .delete(function(req, res) {
+      Super.remove({
+        _id: req.params.super_id
+      }, function(err, superM) {
+        if (err)
+          return res.send(err);
+
+        res.json({ message: 'Successfully deleted' });
+        });
     });
-  })
-  .delete(function(req, res) {
-    User.remove({
-      _id: req.params.userid
-    }, function(err, user) {
+
+  router.post('/supers/:super_id/addStore/:store_id', function(req, res){
+    // save the store and check for errors
+    Super.update({_id: req.params.super_id}, {$push: {stores: req.params.store_id}}, function (err, raw){
       if (err)
         return res.send(err);
 
-      res.json({ message: 'Successfully deleted' });
-      });
+      res.json({ message: 'Store created in super!' });
+    });
   });
 }
