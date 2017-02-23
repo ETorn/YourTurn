@@ -9,7 +9,7 @@ var express    = require('express');
 var app        = express();
 
 var mongoose   = require('mongoose');
-mongoose.connect('mongodb://192.168.1.84/yourturn');
+mongoose.connect('mongodb://127.0.0.1/yourturn');
 
 
 // configure app to use bodyParser()

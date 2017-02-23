@@ -3,13 +3,14 @@ module.exports = function(router) {
   var Store = require('../models/Store');
 
   router.route('/stores')
-    // create a user (accessed at POST http://localhost:8080/users)
     .post(function(req, res) {
-      var store = new Store();      // create a new instance of the User model
-        store.name = req.body.name;  // set the users turn (comes from the request)
+      var store = new Store();
+        store.name = req.body.name;
+        store.storeTurn = 1;
+        store.usersTurn = 1;
         store.users = [];
 
-        // save the user and check for errors
+        // save the store and check for errors
         store.save(function(err) {
           if (err)
             return res.send(err);
@@ -27,23 +28,20 @@ module.exports = function(router) {
     });
 
   router.route('/stores/:store_id')
-    // get the user with that id (accessed at GET http://localhost:8080/users/:user_id)
     .get(function(req, res) {
-      Store.findById(req.params.store_id, function(err, store) {
+      Store.findById(req.params.store_id, function(err, foundStore) {
         if (err)
           return res.send(err);
 
-        res.json(store);
+        res.json(foundStore);
         });
     })
     .put(function(req, res) {
-    // use our user model to find the bear we want
-      Store.findById(req.params.store_id, function(err, store) {
+      Store.findById(req.params.store_id, function(err, foundStore) {
         if (err)
           return res.send(err);
-        store.name = req.body.name;  // update the user info
-        // save the user
-        store.save(function(err) {
+        foundStore.name = req.body.name;
+        foundStore.save(function(err) {
           if (err)
             return res.send(err);
 
@@ -62,13 +60,67 @@ module.exports = function(router) {
         });
     });
 
-    router.post('/stores/:store_id/addUser/:user_id', function(req, res){
-      // save the user and check for errors
-      Store.update({_id: req.params.store_id}, {$push: {users: req.params.user_id}}, function (err, raw){
-        if (err)
-          return res.send(err);
+    router.route('/stores/:store_id/users/:user_id')
+     .post(function(req, res){
+        Store.findByIdAndUpdate({
+          _id: req.params.store_id
+        }, {$push: {users: req.params.user_id}},
+        {safe: true, upsert: true, new : true}, function (err, foundStore){
+          if (err)
+            return res.send(err);
+          var userTurn = foundStore.usersTurn;
+          foundStore.usersTurn++;
 
-        res.json({ message: 'User created in store!' });
+          foundStore.save(function(err) {
+            if (err)
+              return res.send(err);
+
+            res.json({ message: 'User created in store!',  turn: userTurn});
+          });
+        });
+      })
+      .delete(function(req, res){
+        Store.update({
+          _id: req.params.store_id
+        }, {$pull: {users: req.params.user_id}}, {multi: true},function(err, user) {
+          if (err)
+            return res.send(err);
+          console.log(user);
+          res.json({ message: 'Successfully deleted' });
+          });
       });
-    });
+
+      router.route('/stores/:store_id/usersTurn')
+      .get(function(req, res){
+        Store.findById(req.params.store_id, function(err, foundStore) {
+          if (err)
+            return res.send(err);
+
+          res.json({userTurn: foundStore.usersTurn});
+          });
+      })
+
+      router.route('/stores/:store_id/storeTurn')
+      .get(function(req, res){
+        Store.findById(req.params.store_id, function(err, foundStore) {
+          if (err)
+            return res.send(err);
+
+          res.json({storeTurn: foundStore.storeTurn});
+          });
+      })
+      .put(function(req, res){
+        Store.findById(req.params.store_id , function (err, foundStore){
+          if (err)
+            return res.send(err);
+          foundStore.storeTurn++;
+
+          foundStore.save(function(err) {
+            if (err)
+              return res.send(err);
+
+            res.json({ message: 'StoreTurn updated',  storeTurn: foundStore.storeTurn});
+          });
+        });
+      })
 }

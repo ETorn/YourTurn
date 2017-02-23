@@ -2,18 +2,10 @@
 module.exports = function(router) {
   var User = require('../models/User');
 
-  // test route to make sure everything is working (accessed at GET http://localhost:8080/api)
-  router.get('/', function(req, res) {
-      res.json({ message: 'hooray! welcome to our api!' });
-  });
-
 router.route('/users')
   // create a user (accessed at POST http://localhost:8080/users)
   .post(function(req, res) {
     var user = new User();      // create a new instance of the User model
-      user.turn = req.body.turn;  // set the users turn (comes from the request)
-      user.date = req.body.date;
-
       // save the user and check for errors
       user.save(function(err) {
         if (err)
@@ -46,7 +38,7 @@ router.route('/users/:user_id')
     User.findById(req.params.user_id, function(err, user) {
       if (err)
         return res.send(err);
-      user.name = req.body.name;  // update the user info
+      user.turn = req.body.turn;  // update the user info
       // save the user
       user.save(function(err) {
         if (err)
