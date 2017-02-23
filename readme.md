@@ -16,7 +16,7 @@ YourTurnServer
 + GET /stores/:store_id -> Retorna la parada corresponent a la id
 + PUT /stores/:store_id -> Modifica la parada
 + DELETE /stores/:store_id -> Elimina la parada
-+ POST /stores/:store_id/users/:user_id -> Afegeix un usuari a la cua de la parada i retorna el torn de l'usuari
++ POST /stores/:store_id/users/:user_id -> Afegeix un usuari a la cua de la parada i retorna el torn de l'usuari !! Modifiquem aqui el torn del usuari?¿?¿!!!
 + DELETE /stores/:store_id/users/:user_id -> Elimina un usuari de la cua
 + GET /stores/:store_id/usersTurn -> Retorna la cua actual d'aquesta parada
 + PUT /stores/:store_id/storeTurn -> Avança el torn de la parada
