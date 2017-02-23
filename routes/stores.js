@@ -6,31 +6,27 @@ module.exports = function(router) {
     .post(function(req, res) {
       var store = new Store();
         // save the store and check for errors
-        store.save(function(err) {
-          if (err)
-            return res.send(err);
-          if (req.body.name)
-            store.name = req.body.name;
-          store.storeTurn = 1;
-          store.usersTurn = 1;
-          store.users = [];
+        if (req.body.name)
+          store.name = req.body.name;
+        store.storeTurn = 1;
+        store.usersTurn = 1;
+        store.users = [];
 
-          // save the user and check for errors
-          Store.findOne({name : store.name}, function (err, storeM) {
-            console.log(storeM);
-            if(err)
-              console.log(err);
-            if (storeM){
-              return res.json({message: 'This store already exists'});
-            }else{
-              // save the super and check for errors
-              store.save(function(err, newStore) {
-                if (err)
-                  return res.send(err);
-                res.json({ message: 'Store created!', id: newStore.id});
-              });
-            }
-          });
+        // save the user and check for errors
+        Store.findOne({name : store.name}, function (err, storeM) {
+          console.log(storeM);
+          if(err)
+            console.log(err);
+          if (storeM){
+            return res.json({message: 'This store already exists'});
+          }else{
+            // save the super and check for errors
+            store.save(function(err, newStore) {
+              if (err)
+                return res.send(err);
+              res.json({ message: 'Store created!', id: newStore.id});
+            });
+          }
         });
       })
       .get(function(req, res) {
