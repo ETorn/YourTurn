@@ -8,5 +8,5 @@ module.exports = {
   stores: {
     maxTurn: 99
   },
-  dataFile: ''
+  dataFile: 'config/basedata.json'
 };

@@ -6,7 +6,8 @@
   "scripts": {
     "test": "mocha test",
     "start": "node index.js",
-    "mongo": "node scripts/start_mongo.js"
+    "mongo": "node scripts/start_mongo.js",
+    "load_data": "node scripts/load_data.js"
   },
   "repository": {
     "type": "git",
