@@ -1,11 +1,12 @@
 module.exports = {
   mongodb: {
-    address: "localhost"
+    address: 'localhost'
   },
   node: {
-    address: "http://localhost:8080"
+    address: 'http://localhost:8080'
   },
   stores: {
     maxTurn: 99
-  }
+  },
+  dataFile: ''
 };
