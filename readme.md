@@ -12,7 +12,7 @@ YourTurnServer
 
 ### Stores
 + GET /stores -> LLista parades
-+ POST /stores -> Crea una parada
++ POST /stores/:super_id -> Crea una parada al super especificat
 + GET /stores/:store_id -> Retorna la parada corresponent a la id
 + PUT /stores/:store_id -> Modifica la parada
 + DELETE /stores/:store_id -> Elimina la parada
