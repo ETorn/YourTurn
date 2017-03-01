@@ -11,8 +11,11 @@ module.exports = function(router) {
         var superId;
         if (req.body.name)
           store.name = req.body.name;
+
         if (req.body.superId)
           superId = req.body.superId;
+        else
+          return res.json({message: 'No super_id specicfied'})
 
         store.storeTurn = 1;
         store.usersTurn = 1;
@@ -29,13 +32,14 @@ module.exports = function(router) {
             store.save(function(err, newStore) {
               if (err)
                 return res.send(err);
-              
+
               // save the store and check for errors
               var supermrkt = new Super();
               Super.update({_id: superId}, {$push: {stores: store._id}}, function (err, raw){
                 if (err)
                   return res.send(err);
-                  res.json({ message: 'Store created!', storeId: newStore._id, superId: superId});
+
+                res.json({ message: 'Store created!', storeId: newStore._id, superId: superId});
               });
             });
           }
