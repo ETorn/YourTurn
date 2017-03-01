@@ -3,20 +3,23 @@ var config = require('../config');
 
 module.exports = function(router) {
   var Store = require('../models/Store');
-
+  var Super = require('../models/Super');
   router.route('/stores')
     .post(function(req, res) {
       var store = new Store();
         // save the store and check for errors
+        var superId;
         if (req.body.name)
           store.name = req.body.name;
+        if (req.body.superId)
+          superId = req.body.superId;
+
         store.storeTurn = 1;
         store.usersTurn = 1;
         store.users = [];
 
         // save the user and check for errors
         Store.findOne({name : store.name}, function (err, storeM) {
-          console.log(storeM);
           if(err)
             console.log(err);
           if (storeM){
@@ -26,7 +29,14 @@ module.exports = function(router) {
             store.save(function(err, newStore) {
               if (err)
                 return res.send(err);
-              res.json({ message: 'Store created!', id: newStore.id});
+              
+              // save the store and check for errors
+              var supermrkt = new Super();
+              Super.update({_id: superId}, {$push: {stores: store._id}}, function (err, raw){
+                if (err)
+                  return res.send(err);
+                  res.json({ message: 'Store created!', storeId: newStore._id, superId: superId});
+              });
             });
           }
         });

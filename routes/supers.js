@@ -79,6 +79,7 @@ module.exports = function(router) {
         });
     });
 
+  //Probablement es borrara en un futur
   router.post('/supers/:super_id/addStore/:store_id', function(req, res){
     // save the store and check for errors
     Super.update({_id: req.params.super_id}, {$push: {stores: req.params.store_id}}, function (err, raw){
