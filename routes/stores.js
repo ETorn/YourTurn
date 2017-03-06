@@ -46,7 +46,9 @@ module.exports = function(router) {
         });
       })
       .get(function(req, res) {
-        Store.find(function(err, stores) {
+        Store.find()
+        populate('users')
+        .exec(function(err, stores) {
           if (err)
             return res.send(err);
 

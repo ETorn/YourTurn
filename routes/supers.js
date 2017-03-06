@@ -1,7 +1,7 @@
 //User Routes
 module.exports = function(router) {
   var Super = require('../models/Super');
-  
+
   router.route('/supers')
     .post(function(req, res) {
       var superM = new Super();
@@ -33,7 +33,9 @@ module.exports = function(router) {
       });
     })
     .get(function(req, res) {
-      Super.find(function(err, supers) {
+      Super.find()
+      .populate('stores')
+      .exec(function(err, supers) {
         if (err)
           return res.send(err);
 
