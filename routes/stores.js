@@ -4,7 +4,6 @@ var config = require('../config');
 module.exports = function(router) {
   var Store = require('../models/Store');
   var Super = require('../models/Super');
-  var User = require('../models/User');
 
   router.route('/stores')
     .post(function(req, res) {
