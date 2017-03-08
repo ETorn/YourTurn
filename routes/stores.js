@@ -4,6 +4,8 @@ var config = require('../config');
 module.exports = function(router) {
   var Store = require('../models/Store');
   var Super = require('../models/Super');
+  var User = require('../models/User');
+
   router.route('/stores')
     .post(function(req, res) {
       var store = new Store();
@@ -87,30 +89,41 @@ module.exports = function(router) {
         });
     });
 
-  router.route('/stores/:store_id/users/:user_id')
-   .post(function(req, res){
-      Store.findByIdAndUpdate({
-        _id: req.params.store_id
-      }, {$push: {users: req.params.user_id}},
-      {safe: true, upsert: true, new : true}, function (err, foundStore){
-        if (err)
-          return res.send(err);
+    router.route('/stores/:store_id/users/:user_id')
+     .post(function(req, res){
+       Store.find({
+         users: req.params.user_id
+       }, function(err, store){
+          if(err)
+            console.log(err);
+          if (store.length > 0){
+            return res.json({message: 'This user already picked a ticket in this store!'});
+          }else{
+            Store.findByIdAndUpdate({
+              _id: req.params.store_id
+            }, {$push: {users: req.params.user_id}},
+            {safe: true, upsert: true, new : true}, function (err, foundStore){
+              if (err)
+                return res.send(err);
 
-        var userTurn = foundStore.usersTurn;
-        foundStore.usersTurn++;
+              var userTurn = foundStore.usersTurn;
+              foundStore.usersTurn++;
 
-        if (foundStore.usersTurn > config.stores.maxTurn)
-          foundStore.usersTurn = 1;
+              if (foundStore.usersTurn > config.stores.maxTurn)
+                foundStore.usersTurn = 1;
 
-        foundStore.save(function(err) {
-          if (err)
-            return res.send(err);
+              foundStore.save(function(err) {
+                if (err)
+                  return res.send(err);
 
-          res.json({ message: 'User added to store queue!',  turn: userTurn});
-        });
-      });
-    })
-    .delete(function(req, res){
+                res.json({ message: 'User added to store queue!',  turn: userTurn});
+              });
+            });
+          }
+        })
+      })
+
+     .delete(function(req, res){
       Store.update({
         _id: req.params.store_id
       }, {$pull: {users: req.params.user_id}}, {multi: true},function(err, user) {
