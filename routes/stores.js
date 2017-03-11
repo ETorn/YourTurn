@@ -1,5 +1,6 @@
 
 var config = require('../config');
+var fcm = require('../fcm');
 
 module.exports = function(router) {
   var Store = require('../models/Store');
@@ -111,6 +112,14 @@ module.exports = function(router) {
               if (foundStore.usersTurn > config.stores.maxTurn)
                 foundStore.usersTurn = 1;
 
+              fcm.FCMNotificationBuilder()
+                .setTopic('store.' + foundStore._id)
+                .addData('usersTurn', foundStore.usersTurn)
+                .send(function(err, res) {
+                  if (err)
+                    console.log('FCM error:', err);
+                });
+
               foundStore.save(function(err) {
                 if (err)
                   return res.send(err);
@@ -160,6 +169,14 @@ module.exports = function(router) {
 
         if (foundStore.storeTurn > config.stores.maxTurn)
           foundStore.storeTurn = 1;
+
+          fcm.FCMNotificationBuilder()
+            .setTopic('store.' + foundStore._id)
+            .addData('storeTurn', foundStore.storeTurn)
+            .send(function(err, res) {
+              if (err)
+                console.log('FCM error:', err);
+            });
 
         foundStore.save(function(err) {
           if (err)
