@@ -21,6 +21,7 @@
   "homepage": "https://github.com/VictorPuig/YourTurn",
   "dependencies": {
     "body-parser": "^1.16.0",
+    "commander": "^2.9.0",
     "express": "^4.14.1",
     "mongoose": "^4.8.1"
   },
