@@ -1,6 +1,6 @@
-//User Routes
 module.exports = function(router) {
   var Super = require('../models/Super');
+  var Loc = require('../models/Location');
 
   router.route('/supers')
     .post(function(req, res) {
@@ -16,6 +16,13 @@ module.exports = function(router) {
 
         superM.stores = [];
 
+      var location = new Loc();
+      if (req.body.location) {
+        location.name = req.body.name; //nom del super
+        location.loc = req.body.loc; //req sencera
+        //superM.location = req.body.location;
+      }
+
       Super.findOne({name : superM.name, address: superM.address}, function (err, superMrk) {
           console.log(superMrk);
           if(err)
@@ -23,18 +30,27 @@ module.exports = function(router) {
           if (superMrk){
             return res.json({message: 'This super already exists'});
           }else{
-            // save the super and check for errors
-            superM.save(function(err, newSuper) {
+            // save the location and check for errors
+            location.save(function(err, newLoc) {
               if (err)
                 return res.send(err);
-              res.json({ message: 'Super created!', id: newSuper.id});
+
+              superM.loc = newLoc.id;
+
+              // save the super and check for errors
+              superM.save(function(err, newSuper) {
+                if (err)
+                  return res.send(err);
+                res.json({ message: 'Super created!', id: newSuper.id});
+              });
             });
           }
       });
     })
     .get(function(req, res) {
+      var populateQuery = [{path:'stores'}, {path:'location'}];
       Super.find()
-      .populate('stores')
+      .populate(populateQuery)
       .exec(function(err, supers) {
         if (err)
           return res.send(err);
@@ -42,6 +58,11 @@ module.exports = function(router) {
         res.json(supers);
       });
     });
+
+  router.get('/supers/coords', function(req, res){
+    var loc = require('../location');
+    loc.findLocation(req, res);
+  });
 
   router.route('/supers/:super_id')
     .get(function(req, res) {
