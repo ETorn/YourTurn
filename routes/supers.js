@@ -5,10 +5,10 @@ module.exports = function(router) {
   router.route('/supers')
     .post(function(req, res) {
       var superM = new Super();
-      if (req.body.name)
-        superM.name = req.body.name;
       if (req.body.address)
         superM.address = req.body.address;
+      if (req.body.city)
+        superM.city = req.body.city;
       if (req.body.phone)
         superM.phone = req.body.phone;
       if (req.body.fax)
