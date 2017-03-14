@@ -7,7 +7,7 @@ var resolve = function resolve(str) {
 };
 
 var mongoRoute = resolve('%ProgramFiles%\\MongoDB\\Server\\3.4\\bin\\mongod.exe');
-var dbRoute = resolve('%HOMEPATH%\\Documents\\Programming\\e-Torn\\DB');
+var dbRoute = resolve('%HOMEPATH%\\Documents\\Programming\\eTorn\\DB');
 
 var prc = spawn(mongoRoute,  ['--dbpath', dbRoute]);
 
