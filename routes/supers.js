@@ -41,7 +41,7 @@ module.exports = function(router) {
           if (superMrk){
             return res.json({message: 'This super already exists'});
           }else{
-
+            var superId;
             _async.series([
               function(cb) {
               // save the location and check for errors
@@ -50,17 +50,36 @@ module.exports = function(router) {
                   console.log(err);
 
                   superM.location = newLoc.id;
-                  cb();
+
+                  cb(null, newLoc.id);
                 })
+              },
+              function(cb){
+                // save the super and check for errors
+                superM.save(function(err, newSuper) {
+                  if (err)
+                    console.log(err);
+                    //return res.send(err);
+                  //res.json({ message: 'Super created!', id: newSuper.id, super: newSuper});
+                  var result = {};
+                  result.locationId = superM.location;
+                  result.superId = newSuper.id;
+                  cb(null, result);
+                });
               }
             ],
-            function(err){
-              // save the super and check for errors
-              superM.save(function(err, newSuper) {
+            function(err, result){
+              console.log("super",result[1]);
+              var locationUpdated = {};
+              locationUpdated.superId = result[1].superId;
+
+              // update the location
+              Loc.update({_id: result[1].locationId}, locationUpdated, function (err, raw){
                 if (err)
                   return res.send(err);
-                res.json({ message: 'Super created!', id: newSuper.id, super: newSuper});
+                  console.log(raw);
               });
+              res.json({ message: 'Super created!', id: result[1].superId});
             });
           }
       });

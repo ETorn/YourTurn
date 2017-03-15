@@ -1,9 +1,11 @@
 var Loc      = require('./models/Location');
+var Super = require('./models/Super');
+var _async = require('async');
 module.exports.findLocation = function(req, res) {
     //var limit = req.query.limit || 10;
 
     // get the max distance or set it to 1 kilometer
-    var maxDistance = req.query.distance || 1;
+    var maxDistance = req.query.distance || 20;
 
     // we need to convert the distance to radians
     // the raduis of Earth is approximately 6371 kilometers
@@ -14,19 +16,41 @@ module.exports.findLocation = function(req, res) {
     coords[0] = req.query.longitude;
     coords[1] = req.query.latitude;
 
-    // find a location
-    Loc.find({
-      loc: {
-        $near: coords,
-        $maxDistance: maxDistance
+    _async.series([
+      function(cb) {
+        // find a location
+        Loc.find({
+          loc: {
+            $near: coords,
+            $maxDistance: maxDistance
+          }
+        })
+        //.limit(limit)
+        .exec(function(err, locations) {
+          if (err) {
+            console.log(err)
+          }
+          cb(null,locations);
+        });
       }
-    })
-    //.limit(limit)
-    .exec(function(err, locations) {
-      if (err) {
-        return res.json(500, err);
-      }
-
-      res.json(200, locations);
+    ],
+    function(err, locations){
+      var arrayId = locations[0].map(function(o){
+        return o.superId;
+      });
+      var superIdArray = arrayId.filter(function(e){
+        return !!e;
+      });
+      console.log(superIdArray);
+      // save the super and check for errors
+      Super.find({
+        _id: {$in : superIdArray}
+      })
+      .exec(function(err, supers) {
+        if (err)
+          return res.send(err);
+        res.json(supers);
+      });
     });
+
 }
