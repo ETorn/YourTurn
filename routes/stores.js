@@ -233,6 +233,8 @@ module.exports = function(router) {
         res.json({ message: 'Totem added to store!'});
       });
     })
+
+    router.route('/stores/:store_id/totems/:totem_id')
     .delete(function(req, res){
       Store.update({
         _id: req.params.store_id
