@@ -101,7 +101,9 @@ module.exports = function(router) {
 
       res.json({totems: foundSupers.totems});
     });
-  })
+  });
+
+  router.route('/supers/:super_id/totems/:totem_id')
   .post(function(req, res){
     Super.findByIdAndUpdate({
       _id: req.params.super_id
@@ -113,8 +115,6 @@ module.exports = function(router) {
       res.json({ message: 'Totem added to super!'});
     });
   })
-
-  router.route('/supers/:super_id/totems/:totem_id')
   .delete(function(req, res){
     Super.update({
       _id: req.params.super_id

@@ -21,7 +21,7 @@ module.exports = function(router) {
       });
     });
 
-  router.route('/totem/:totem_id')
+  router.route('/totems/:totem_id')
     .get(function(req, res) {
       Totem.findById(req.params.totem_id, function(err, totem) {
         if (err)
