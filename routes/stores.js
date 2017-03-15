@@ -136,7 +136,6 @@ module.exports = function(router) {
           }
         })
       })
-
      .delete(function(req, res){
       Store.update({
         _id: req.params.store_id
@@ -213,4 +212,35 @@ module.exports = function(router) {
         });
       });
     })
+
+    router.route('/stores/:store_id/totems')
+    .get(function(req, res){
+      Store.findById(req.params.store_id, function(err, foundStore) {
+        if (err)
+          return res.send(err);
+
+        res.json({totems: foundStore.totems});
+      });
+    })
+    .post(function(req, res){
+      Store.findByIdAndUpdate({
+        _id: req.params.store_id
+      }, {$push: {totems: req.params.totem_id}},
+      {safe: true, upsert: true, new: true}, function (err, foundStore){
+        if (err)
+           return res.send(err);
+
+        res.json({ message: 'Totem added to store!'});
+      });
+    })
+    .delete(function(req, res){
+      Store.update({
+        _id: req.params.store_id
+      }, {$pull: {totems: req.params.totem_id}}, {multi: true}, function(err, totem) {
+        if (err)
+          return res.send(err);
+
+        res.json({ message: 'Successfully deleted totem'});
+      });
+    });
 }

@@ -4,9 +4,6 @@
 var config = require('./config');
 
 // Require dependencies
-var User       = require('./models/User');
-var Super      = require('./models/Super');
-var Store      = require('./models/Store');
 var express    = require('express');
 var app        = express();
 
@@ -25,9 +22,10 @@ app.use(bodyParser.json());
 var router = express.Router();              // get an instance of the express Router
 
 // REGISTER OUR ROUTES -------------------------------
-require ('./routes/users.js') (router);
-require ('./routes/stores.js') (router);
-require ('./routes/supers.js') (router);
+require ('./routes/users') (router);
+require ('./routes/stores') (router);
+require ('./routes/supers') (router);
+require ('./routes/totems') (router);
 app.use('/', router);
 
 

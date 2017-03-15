@@ -6,7 +6,8 @@ var SuperSchema   = new Schema({
     address: String,
     phone: String,
     fax: String,
-    stores: [{type: Schema.ObjectId, ref: "Store"}]
+    stores: [{type: Schema.ObjectId, ref: "Store"}],
+    totems: [{type: Schema.ObjectId, ref: "Totems"}]
     //wifi: String,
     //coordinates: String
 });

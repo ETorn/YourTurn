@@ -15,6 +15,7 @@ module.exports = function(router) {
         superM.fax = req.body.fax;
 
         superM.stores = [];
+        superM.totems = [];
 
       Super.findOne({name : superM.name, address: superM.address}, function (err, superMrk) {
           console.log(superMrk);
