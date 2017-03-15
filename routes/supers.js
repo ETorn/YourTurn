@@ -1,6 +1,7 @@
 module.exports = function(router) {
   var Super = require('../models/Super');
   var Loc = require('../models/Location');
+  var _async = require('async');
 
   router.route('/supers')
     .post(function(req, res) {
@@ -23,25 +24,33 @@ module.exports = function(router) {
         //superM.location = req.body.location;
       }
 
-      Super.findOne({name : superM.name, address: superM.address}, function (err, superMrk) {
+      Super.findOne({address: superM.address}, function (err, superMrk) {
           console.log(superMrk);
           if(err)
             console.log(err);
           if (superMrk){
             return res.json({message: 'This super already exists'});
           }else{
-            // save the location and check for errors
-            location.save(function(err, newLoc) {
-              if (err)
-                return res.send(err);
 
-              superM.loc = newLoc.id;
-
+            _async.series([
+              function(cb) {
+              // save the location and check for errors
+                location.save(function(err, newLoc) {
+                if (err)
+                  console.log(err);
+                  
+                  console.log(newLoc);
+                  superM.location = newLoc.id;
+                  cb();
+                })
+              }
+            ], 
+            function(err){
               // save the super and check for errors
               superM.save(function(err, newSuper) {
                 if (err)
                   return res.send(err);
-                res.json({ message: 'Super created!', id: newSuper.id});
+                res.json({ message: 'Super created!', id: newSuper.id, super: newSuper});
               });
             });
           }
