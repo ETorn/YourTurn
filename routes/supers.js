@@ -92,4 +92,37 @@ module.exports = function(router) {
       res.json({ message: 'Store created in super!' });
     });
   });
+
+  router.route('/supers/:super_id/totems')
+  .get(function(req, res){
+    Supers.findById(req.params.super_id, function(err, foundSupers) {
+      if (err)
+        return res.send(err);
+
+      res.json({totems: foundSupers.totems});
+    });
+  })
+  .post(function(req, res){
+    Super.findByIdAndUpdate({
+      _id: req.params.super_id
+    }, {$push: {totems: req.params.totem_id}},
+    {safe: true, upsert: true, new: true}, function (err, foundSuper){
+      if (err)
+         return res.send(err);
+
+      res.json({ message: 'Totem added to super!'});
+    });
+  })
+
+  router.route('/supers/:super_id/totems/:totem_id')
+  .delete(function(req, res){
+    Super.update({
+      _id: req.params.super_id
+    }, {$pull: {totems: req.params.totem_id}}, {multi: true}, function(err, totem) {
+      if (err)
+        return res.send(err);
+
+      res.json({ message: 'Successfully deleted totem'});
+    });
+  });
 }
