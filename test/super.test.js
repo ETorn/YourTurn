@@ -210,13 +210,106 @@ describe('Super', function() {
         });
       });
     });
-  });
 
-  describe('POST /supers/:super_id/totems', function(){
-    it('should add a totem to the super');
-  });
+    describe('Totem functionality', function() {
 
-  describe('GET /supers/:super_id/totems', function(){
-    it('should return the list of totems in this super');
+      var totemId = null
+
+      beforeEach(function(done) {
+        request({
+          url: config.node.address + "/totems",
+          method: 'POST',
+          json: true,
+          body: {
+            // Empty body
+          }
+        }, function(err, res, body) {
+          expect(err).to.be(null);
+          expect(res.statusCode).to.be(200);
+
+          totemId = body.totemId;
+
+          done();
+        });
+      });
+
+      afterEach(function(done) {
+
+        expect(totemId).to.be.a('string');
+
+        request({
+          url: config.node.address + "/totems/" + totemId,
+          method: 'DELETE',
+          json: true
+        }, function(err, res, body) {
+          expect(err).to.be(null);
+          expect(res.statusCode).to.be(200);
+
+          totemId = null;
+
+          done();
+        });
+      });
+
+      describe('POST /supers/:super_id/totems/:totem_id', function(){
+        it('should add a totem to the super', function(done) {
+
+          expect(id).not.to.be(null);
+          expect(totemId).to.be.a('string');
+
+          request({
+            url: config.node.address + "/supers/" + id + '/totems/' + totemId,
+            method: 'POST',
+            json: true,
+            body: {
+              // Hmm?
+            }
+          }, function(err, res, body) {
+            expect(err).to.be(null);
+            expect(res.statusCode).to.be(200);
+            // expect(body).to.have.property('name');
+            // expect(body).to.have.property('address');
+            // expect(body).to.have.property('phone');
+            // expect(body).to.have.property('fax');
+            // expect(body.name).to.be('testSuper');
+            // expect(body.address).to.be('testAddress');
+            // expect(body.phone).to.be('updatedPhone');
+            // expect(body.fax).to.be('updatedFax');
+
+            done();
+          });
+        });
+      });
+
+      describe('GET /supers/:super_id/totems', function(){
+        it('should return the list of totems in this super', function(done) {
+
+          expect(id).not.to.be(null);
+          expect(totemId).to.be.a('string');
+
+          request({
+            url: config.node.address + "/supers/" + id + '/totems/' + totemId,
+            method: 'GET',
+            json: true,
+            body: {
+              // Hmm?
+            }
+          }, function(err, res, body) {
+            expect(err).to.be(null);
+            expect(res.statusCode).to.be(200);
+            // expect(body).to.have.property('name');
+            // expect(body).to.have.property('address');
+            // expect(body).to.have.property('phone');
+            // expect(body).to.have.property('fax');
+            // expect(body.name).to.be('testSuper');
+            // expect(body.address).to.be('testAddress');
+            // expect(body.phone).to.be('updatedPhone');
+            // expect(body.fax).to.be('updatedFax');
+
+            done();
+          });
+        });
+      });
+    });
   });
 });
