@@ -343,7 +343,7 @@ describe('Stores', function() {
         });
       });
 
-      it('it should be 0 when there are no users', function(done) {
+      it('should be 0 when there are no users', function(done) {
 
         expect(storeId).not.to.be(null);
 
@@ -361,7 +361,7 @@ describe('Stores', function() {
         });
       });
 
-      it('it should be 1 when there is 1 user', function(done) {
+      it('should be 1 when there is 1 user', function(done) {
 
         expect(storeId).not.to.be(null);
         expect(userId).not.to.be(null);
@@ -400,7 +400,7 @@ describe('Stores', function() {
         });
       });
 
-      it('it should be 0 when removing last user', function(done) {
+      it('should be 0 when removing last user', function(done) {
 
         expect(storeId).not.to.be(null);
 
@@ -442,7 +442,7 @@ describe('Stores', function() {
     var turn;
 
     describe('GET /stores/:store_id/storeTurn', function(){
-      it('it should return the current turn', function(done) {
+      it('should return the current turn', function(done) {
 
         expect(storeId).not.to.be(null);
 
@@ -465,7 +465,7 @@ describe('Stores', function() {
     });
 
     describe('PUT /stores/:store_id/storeTurn', function(){
-      it('it should advance the current turn without error', function(done) {
+      it('should advance the current turn without error', function(done) {
 
         expect(storeId).not.to.be(null);
         expect(turn).not.to.be(null);

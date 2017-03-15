@@ -211,4 +211,12 @@ describe('Super', function() {
       });
     });
   });
+
+  describe('POST /supers/:super_id/totems', function(){
+    it('should add a totem to the super');
+  });
+
+  describe('GET /supers/:super_id/totems', function(){
+    it('should return the list of totems in this super');
+  });
 });
