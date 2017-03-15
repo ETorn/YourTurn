@@ -1,10 +1,10 @@
 {
     "supers": [
         {
-            "name": "Caprabo 1",
             "address": "Caprabo 1",
             "phone": "123456789",
             "fax": "123456789",
+            "city": "Barcelona",
             "stores": [
                 {
                     "name": "Carniceria01"
@@ -15,10 +15,10 @@
             ]
         },
         {
-            "name": "Caprabo 2",
             "address": "Caprabo 2",
             "phone": "123456789",
             "fax": "123456789",
+            "city": "Barcelona",
             "stores": [
                 {
                     "name": "Carniceria01"
