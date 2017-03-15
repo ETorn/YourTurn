@@ -3,6 +3,17 @@ module.exports = function(router) {
   var Loc = require('../models/Location');
   var _async = require('async');
 
+
+  router.route('/locations')
+  .get(function(req, res) {
+    Loc.find()
+    .exec(function(err, locs) {
+      if (err)
+        return res.send(err);
+
+      res.json(locs);
+    });
+  })
   router.route('/supers')
     .post(function(req, res) {
       var superM = new Super();
@@ -18,8 +29,7 @@ module.exports = function(router) {
         superM.stores = [];
 
       var location = new Loc();
-      if (req.body.location) {
-        location.name = req.body.name; //nom del super
+      if (req.body.loc) {
         location.loc = req.body.loc; //req sencera
         //superM.location = req.body.location;
       }
@@ -38,13 +48,12 @@ module.exports = function(router) {
                 location.save(function(err, newLoc) {
                 if (err)
                   console.log(err);
-                  
-                  console.log(newLoc);
+
                   superM.location = newLoc.id;
                   cb();
                 })
               }
-            ], 
+            ],
             function(err){
               // save the super and check for errors
               superM.save(function(err, newSuper) {
