@@ -41,11 +41,13 @@ module.exports.findLocation = function(req, res) {
       var superIdArray = arrayId.filter(function(e){
         return !!e;
       });
+      var populateQuery = [{path:'stores'}, {path:'location'}];
       console.log(superIdArray);
       // save the super and check for errors
       Super.find({
         _id: {$in : superIdArray}
       })
+      .populate(populateQuery)
       .exec(function(err, supers) {
         if (err)
           return res.send(err);
