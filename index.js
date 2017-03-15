@@ -1,3 +1,11 @@
+var im = require('istanbul-middleware'),
+    isCoverageEnabled = (process.argv[2] == "coverage");
+
+if (isCoverageEnabled) {
+    console.log('Coverage activat! Executa els tests i mira /coverage');
+    im.hookLoader(__dirname);
+}
+
 // BASE SETUP
 // =============================================================================
 
@@ -28,6 +36,9 @@ require ('./routes/supers') (router);
 require ('./routes/totems') (router);
 app.use('/', router);
 
+if (isCoverageEnabled) {
+    app.use('/coverage', im.createHandler());
+}
 
 // REGISTER OUR MIDDLEWARES -------------------------------
 app.use(function(req, res, next) {
