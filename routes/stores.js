@@ -1,6 +1,12 @@
-
 var config = require('../config');
 var fcm = require('../fcm');
+var _async = require('async');
+
+var computeQueue = function(store) {
+  store = store.toObject();
+  store.queue = store.users.length;
+  return store;
+}
 
 module.exports = function(router) {
   var Store = require('../models/Store');
@@ -52,7 +58,7 @@ module.exports = function(router) {
           if (err)
             return res.send(err);
 
-          res.json(stores);
+          res.json(stores.map(computeQueue));
         });
       });
 
@@ -62,8 +68,8 @@ module.exports = function(router) {
         if (err)
           return res.send(err);
 
-        res.json(foundStore);
-        });
+        res.json(computeQueue(foundStore));
+      });
     })
     .put(function(req, res) {
       Store.findById(req.params.store_id, function(err, foundStore) {
@@ -170,6 +176,31 @@ module.exports = function(router) {
         if (foundStore.storeTurn > config.stores.maxTurn)
           foundStore.storeTurn = 1;
 
+        _async.parallel([
+          function(cb) {
+            Store.update({
+              _id: req.params.store_id
+            }, {$pull: {users: foundStore.users[0]}}, {multi: true},function(err, user) {
+              if (err)
+                return cb(err);
+
+              console.log('First user removed from queue.');
+
+              cb();
+            });
+          },
+
+          function(cb) {
+            foundStore.save(function(err) {
+              cb(err);
+            });
+          }
+        ],
+
+        function(err) {
+          if (err)
+            return res.send(err);
+
           fcm.FCMNotificationBuilder()
             .setTopic('store.' + foundStore._id)
             .addData('storeTurn', foundStore.storeTurn)
@@ -177,10 +208,6 @@ module.exports = function(router) {
               if (err)
                 console.log('FCM error:', err);
             });
-
-        foundStore.save(function(err) {
-          if (err)
-            return res.send(err);
 
           res.json({ message: 'StoreTurn updated',  storeTurn: foundStore.storeTurn});
         });
