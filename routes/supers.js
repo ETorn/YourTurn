@@ -95,7 +95,7 @@ module.exports = function(router) {
 
   router.route('/supers/:super_id/totems')
   .get(function(req, res){
-    Supers.findById(req.params.super_id, function(err, foundSupers) {
+    Super.findById(req.params.super_id, function(err, foundSupers) {
       if (err)
         return res.send(err);
 

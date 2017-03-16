@@ -288,7 +288,7 @@ describe('Super', function() {
           expect(totemId).to.be.a('string');
 
           request({
-            url: config.node.address + "/supers/" + id + '/totems/' + totemId,
+            url: config.node.address + "/supers/" + id + '/totems/',
             method: 'GET',
             json: true,
             body: {
