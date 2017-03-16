@@ -14,7 +14,7 @@ describe('Super', function() {
           method: 'POST',
           json: true,
           body: {
-            name: 'testSuper',
+            city: 'testCity',
             address: 'testAddress',
             phone: 'testPhone',
             fax: 'testFax'
@@ -39,7 +39,7 @@ describe('Super', function() {
           method: 'POST',
           json: true,
           body: {
-            name: 'testSuper',
+            city: 'testCity',
             address: 'testAddress',
             phone: 'testPhone',
             fax: 'testFax'
@@ -86,6 +86,7 @@ describe('Super', function() {
         method: 'POST',
         json: true,
         body: {
+          city: 'testCity',
           name: 'testSuper',
           address: 'testAddress',
           phone: 'testPhone',
@@ -147,11 +148,11 @@ describe('Super', function() {
         }, function(err, res, body) {
           expect(err).to.be(null);
           expect(res.statusCode).to.be(200);
-          expect(body).to.have.property('name');
+          expect(body).to.have.property('city');
           expect(body).to.have.property('address');
           expect(body).to.have.property('phone');
           expect(body).to.have.property('fax');
-          expect(body.name).to.be('testSuper');
+          expect(body.city).to.be('testCity');
           expect(body.address).to.be('testAddress');
           expect(body.phone).to.be('testPhone');
           expect(body.fax).to.be('testFax');
@@ -197,11 +198,11 @@ describe('Super', function() {
         }, function(err, res, body) {
           expect(err).to.be(null);
           expect(res.statusCode).to.be(200);
-          expect(body).to.have.property('name');
+          expect(body).to.have.property('city');
           expect(body).to.have.property('address');
           expect(body).to.have.property('phone');
           expect(body).to.have.property('fax');
-          expect(body.name).to.be('testSuper');
+          expect(body.city).to.be('testCity');
           expect(body.address).to.be('testAddress');
           expect(body.phone).to.be('updatedPhone');
           expect(body.fax).to.be('updatedFax');
@@ -267,6 +268,9 @@ describe('Super', function() {
           }, function(err, res, body) {
             expect(err).to.be(null);
             expect(res.statusCode).to.be(200);
+
+            console.log(body);
+
             // expect(body).to.have.property('name');
             // expect(body).to.have.property('address');
             // expect(body).to.have.property('phone');
