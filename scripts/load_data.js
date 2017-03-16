@@ -27,10 +27,10 @@ prc.on('close', function(){
       method: 'POST',
       json: true,
       body: {
-        name: aSuper.name,
         address: aSuper.address,
         phone: aSuper.phone,
-        fax: aSuper.fax
+        fax: aSuper.fax,
+        location: aSuper.location
       }
     }, function(err, res, body) {
       if (err || res.statusCode != 200) {
