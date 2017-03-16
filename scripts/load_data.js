@@ -3,6 +3,8 @@ var request = require('request');
 var fs = require('fs');
 var spawn = require('child_process').spawn;
 
+var sourceFile = process.argv[2] || config.dataFile;
+
 var resolve = function resolve(str) {
   return str.replace(/%([^%]+)%/g, function(_,n) {
     return process.env[n];
@@ -17,7 +19,7 @@ var prc = spawn(mongoRoute,  ['yourturn', '--eval', 'db.dropDatabase()']);
 prc.on('close', function(){
 
   console.log('Done. Loading supers and Stores...')
-  var json = JSON.parse(fs.readFileSync(config.dataFile, 'utf8'));
+  var json = JSON.parse(fs.readFileSync(sourceFile, 'utf8'));
 
   for (var i = 0; i < json.supers.length; i++) {
     var aSuper = json.supers[i];
