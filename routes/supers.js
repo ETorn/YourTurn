@@ -1,41 +1,49 @@
-//User Routes
 module.exports = function(router) {
   var Super = require('../models/Super');
+  var _async = require('async');
+  var geolib = require('geolib');
 
   router.route('/supers')
     .post(function(req, res) {
       var superM = new Super();
-      if (req.body.name)
-        superM.name = req.body.name;
       if (req.body.address)
         superM.address = req.body.address;
+      if (req.body.city)
+        superM.city = req.body.city;
       if (req.body.phone)
         superM.phone = req.body.phone;
       if (req.body.fax)
         superM.fax = req.body.fax;
 
-        superM.stores = [];
-        superM.totems = [];
+      superM.stores = [];
+      superM.totems = [];
 
-      Super.findOne({name : superM.name, address: superM.address}, function (err, superMrk) {
-          console.log(superMrk);
+      if (req.body.location) {
+        superM.location = req.body.location;
+      }
+
+      Super.findOne({address: superM.address}, function (err, superMrk) {
           if(err)
             console.log(err);
+
           if (superMrk){
             return res.json({message: 'This super already exists'});
-          }else{
-            // save the super and check for errors
+
+          } else {
             superM.save(function(err, newSuper) {
               if (err)
                 return res.send(err);
+
               res.json({ message: 'Super created!', id: newSuper.id});
             });
           }
       });
     })
     .get(function(req, res) {
+      // var populateQuery = [{path:'stores'}, {path:'location'}];
+      var populateQuery = [{path:'stores'}];
       Super.find()
-      .populate('stores')
+      .populate(populateQuery)
       .exec(function(err, supers) {
         if (err)
           return res.send(err);
@@ -43,6 +51,35 @@ module.exports = function(router) {
         res.json(supers);
       });
     });
+
+  router.get('/supers/coords', function(req, res){
+    // var loc = require('../location');
+    // loc.findLocation(req, res);
+
+    var maxDistance = req.query.distance || 1000;  // Metres. 1km default
+
+    var coords = {
+      latitude: req.query.latitude,
+      longitude: req.query.longitude
+    }
+
+    var latitudeUpper = geolib.computeDestinationPoint(coords, maxDistance, 0).latitude;
+    var latitudeLower = geolib.computeDestinationPoint(coords, maxDistance, 180).latitude;
+    var longitudeUpper = geolib.computeDestinationPoint(coords, maxDistance, 90).longitude;
+    var longitudeLower = geolib.computeDestinationPoint(coords, maxDistance, 270).longitude;
+
+    Super
+      .find({
+        "location.lat": {$gt: latitudeLower, $lt: latitudeUpper},
+        "location.long": {$gt: longitudeLower, $lt: longitudeUpper}
+      })
+      .exec(function(err, supers) {
+        if (err)
+          return res.send(err);
+
+        res.send(supers);
+      });
+  });
 
   router.route('/supers/:super_id')
     .get(function(req, res) {

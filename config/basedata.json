@@ -1,10 +1,14 @@
 {
     "supers": [
         {
-            "address": "Caprabo 1",
+            "city": "Barcelona",
+            "address": "Caprabo molins de rei",
             "phone": "123456789",
             "fax": "123456789",
-            "city": "Barcelona",
+            "location": {
+              "lat": 41.385926,
+              "long": 2.105943
+            },
             "stores": [
                 {
                     "name": "Carniceria01"
@@ -15,10 +19,14 @@
             ]
         },
         {
-            "address": "Caprabo 2",
+            "city": "Barcelona",
+            "address": "Caprabo ausias march",
             "phone": "123456789",
             "fax": "123456789",
-            "city": "Barcelona",
+            "location": {
+              "lat": 41.404626,
+              "long": 2.022925
+            },
             "stores": [
                 {
                     "name": "Carniceria01"
