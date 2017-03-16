@@ -1,19 +1,8 @@
 module.exports = function(router) {
   var Super = require('../models/Super');
-  var Loc = require('../models/Location');
   var _async = require('async');
+  var geolib = require('geolib');
 
-
-  router.route('/locations')
-  .get(function(req, res) {
-    Loc.find()
-    .exec(function(err, locs) {
-      if (err)
-        return res.send(err);
-
-      res.json(locs);
-    });
-  })
   router.route('/supers')
     .post(function(req, res) {
       var superM = new Super();
@@ -26,66 +15,32 @@ module.exports = function(router) {
       if (req.body.fax)
         superM.fax = req.body.fax;
 
-        superM.stores = [];
+      superM.stores = [];
 
-      var location = new Loc();
-      if (req.body.loc) {
-        location.loc = req.body.loc; //req sencera
-        //superM.location = req.body.location;
+      if (req.body.location) {
+        superM.location = req.body.location;
       }
 
       Super.findOne({address: superM.address}, function (err, superMrk) {
-          console.log(superMrk);
           if(err)
             console.log(err);
+
           if (superMrk){
             return res.json({message: 'This super already exists'});
-          }else{
-            var superId;
-            _async.series([
-              function(cb) {
-              // save the location and check for errors
-                location.save(function(err, newLoc) {
-                if (err)
-                  console.log(err);
 
-                  superM.location = newLoc.id;
+          } else {
+            superM.save(function(err, newSuper) {
+              if (err)
+                return res.send(err);
 
-                  cb(null, newLoc.id);
-                })
-              },
-              function(cb){
-                // save the super and check for errors
-                superM.save(function(err, newSuper) {
-                  if (err)
-                    console.log(err);
-                    //return res.send(err);
-                  //res.json({ message: 'Super created!', id: newSuper.id, super: newSuper});
-                  var result = {};
-                  result.locationId = superM.location;
-                  result.superId = newSuper.id;
-                  cb(null, result);
-                });
-              }
-            ],
-            function(err, result){
-              console.log("super",result[1]);
-              var locationUpdated = {};
-              locationUpdated.superId = result[1].superId;
-
-              // update the location
-              Loc.update({_id: result[1].locationId}, locationUpdated, function (err, raw){
-                if (err)
-                  return res.send(err);
-                  console.log(raw);
-              });
-              res.json({ message: 'Super created!', id: result[1].superId});
+              res.json({ message: 'Super created!', id: newSuper.id});
             });
           }
       });
     })
     .get(function(req, res) {
-      var populateQuery = [{path:'stores'}, {path:'location'}];
+      // var populateQuery = [{path:'stores'}, {path:'location'}];
+      var populateQuery = [{path:'stores'}];
       Super.find()
       .populate(populateQuery)
       .exec(function(err, supers) {
@@ -97,8 +52,32 @@ module.exports = function(router) {
     });
 
   router.get('/supers/coords', function(req, res){
-    var loc = require('../location');
-    loc.findLocation(req, res);
+    // var loc = require('../location');
+    // loc.findLocation(req, res);
+
+    var maxDistance = req.query.distance || 1000;  // Metres. 1km default
+
+    var coords = {
+      latitude: req.query.latitude,
+      longitude: req.query.longitude
+    }
+
+    var latitudeUpper = geolib.computeDestinationPoint(coords, maxDistance, 0).latitude;
+    var latitudeLower = geolib.computeDestinationPoint(coords, maxDistance, 180).latitude;
+    var longitudeUpper = geolib.computeDestinationPoint(coords, maxDistance, 90).longitude;
+    var longitudeLower = geolib.computeDestinationPoint(coords, maxDistance, 270).longitude;
+
+    Super
+      .find({
+        "location.lat": {$gt: latitudeLower, $lt: latitudeUpper},
+        "location.long": {$gt: longitudeLower, $lt: longitudeUpper}
+      })
+      .exec(function(err, supers) {
+        if (err)
+          return res.send(err);
+
+        res.send(supers);
+      });
   });
 
   router.route('/supers/:super_id')
