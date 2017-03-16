@@ -7,9 +7,11 @@ var SuperSchema   = new Schema({
     phone: String,
     fax: String,
     stores: [{type: Schema.ObjectId, ref: "Store"}],
-    location: {type: Schema.ObjectId, ref: "Location"}
+    location: {
+      lat: Number,
+      long: Number
+    }
     //wifi: String,
-    //coordinates: String
 });
 
 var SuperModel = mongoose.model('Super', SuperSchema);

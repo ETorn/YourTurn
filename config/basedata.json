@@ -4,7 +4,10 @@
             "address": "Caprabo molins de rei",
             "phone": "123456789",
             "fax": "123456789",
-            "location": [2.105943, 41.385926],
+            "location": {
+              "lat": 41.385926,
+              "long": 2.105943
+            },
             "stores": [
                 {
                     "name": "Carniceria01"
@@ -18,7 +21,10 @@
             "address": "Caprabo ausias march",
             "phone": "123456789",
             "fax": "123456789",
-            "location": [2.022925, 41.404626],
+            "location": {
+              "lat": 41.404626,
+              "long": 2.022925
+            },
             "stores": [
                 {
                     "name": "Carniceria01"
