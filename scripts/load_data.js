@@ -30,7 +30,7 @@ prc.on('close', function(){
         address: aSuper.address,
         phone: aSuper.phone,
         fax: aSuper.fax,
-        location: aSuper.location
+        loc: aSuper.location
       }
     }, function(err, res, body) {
       if (err || res.statusCode != 200) {
