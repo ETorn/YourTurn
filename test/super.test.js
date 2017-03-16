@@ -269,16 +269,8 @@ describe('Super', function() {
             expect(err).to.be(null);
             expect(res.statusCode).to.be(200);
 
-            console.log(body);
-
-            // expect(body).to.have.property('name');
-            // expect(body).to.have.property('address');
-            // expect(body).to.have.property('phone');
-            // expect(body).to.have.property('fax');
-            // expect(body.name).to.be('testSuper');
-            // expect(body.address).to.be('testAddress');
-            // expect(body.phone).to.be('updatedPhone');
-            // expect(body.fax).to.be('updatedFax');
+            expect(body).to.have.property('message');
+            expect(body.message).to.be('Totem added to super!');
 
             done();
           });
@@ -292,8 +284,8 @@ describe('Super', function() {
           expect(totemId).to.be.a('string');
 
           request({
-            url: config.node.address + "/supers/" + id + '/totems/',
-            method: 'GET',
+            url: config.node.address + "/supers/" + id + '/totems/' + totemId,
+            method: 'POST',
             json: true,
             body: {
               // Hmm?
@@ -301,16 +293,22 @@ describe('Super', function() {
           }, function(err, res, body) {
             expect(err).to.be(null);
             expect(res.statusCode).to.be(200);
-            // expect(body).to.have.property('name');
-            // expect(body).to.have.property('address');
-            // expect(body).to.have.property('phone');
-            // expect(body).to.have.property('fax');
-            // expect(body.name).to.be('testSuper');
-            // expect(body.address).to.be('testAddress');
-            // expect(body.phone).to.be('updatedPhone');
-            // expect(body.fax).to.be('updatedFax');
 
-            done();
+            request({
+              url: config.node.address + "/supers/" + id + '/totems/',
+              method: 'GET',
+              json: true
+            }, function(err, res, body) {
+              expect(err).to.be(null);
+              expect(res.statusCode).to.be(200);
+
+              expect(body).to.have.property('totems');
+              expect(body.totems).to.be.an('array');
+              expect(body.totems.length).to.be(1);
+              expect(body.totems[0]).to.be(totemId);
+
+              done();
+            });
           });
         });
       });
