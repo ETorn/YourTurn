@@ -30,10 +30,19 @@ module.exports = function(router) {
         store.users = [];
 
         // save the user and check for errors
-        Store.findOne({name : store.name}, function (err, storeM) {
+        Super.findOne({_id: superId}, 'stores')
+        .populate('stores')
+        .exec(function (err, result) {
           if(err)
             console.log(err);
-          if (storeM){
+
+          var storeNames = result.stores.map(function(s) {
+            return s.name;
+          });
+
+          var storeFound = storeNames.indexOf(store.name) !== -1;
+
+          if (storeFound){
             return res.json({message: 'This store already exists'});
           }else{
             // save the super and check for errors

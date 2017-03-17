@@ -1,7 +1,32 @@
+var geolib = require('geolib');
+
+var addDistance = function addDistance(s, req) {
+  var s = s.toObject() || s;
+
+  // Si no hi ha coordenades distancia = 0
+  if (!req.query.latitude || !req.query.longitude) {
+    s.distance = 0;
+    return s;
+  }
+
+  var coords = {
+    latitude: req.query.latitude,
+    longitude: req.query.longitude
+  };
+
+  var superCoords = {
+    latitude: s.location.lat,
+    longitude: s.location.long
+  };
+
+  s.distance = geolib.getDistance(coords, superCoords, 10);
+
+  return s;
+};
+
 module.exports = function(router) {
   var Super = require('../models/Super');
   var _async = require('async');
-  var geolib = require('geolib');
 
   router.route('/supers')
     .post(function(req, res) {
@@ -40,46 +65,43 @@ module.exports = function(router) {
       });
     })
     .get(function(req, res) {
-      // var populateQuery = [{path:'stores'}, {path:'location'}];
       var populateQuery = [{path:'stores'}];
-      Super.find()
+
+      var query = Super.find();
+
+      if (req.query.latitude && req.query.longitude) {
+        var maxDistance = req.query.distance || 1000;  // Metres. 1km default
+
+        var coords = {
+          latitude: req.query.latitude,
+          longitude: req.query.longitude
+        }
+
+        var latitudeUpper = geolib.computeDestinationPoint(coords, maxDistance, 0).latitude;
+        var latitudeLower = geolib.computeDestinationPoint(coords, maxDistance, 180).latitude;
+        var longitudeUpper = geolib.computeDestinationPoint(coords, maxDistance, 90).longitude;
+        var longitudeLower = geolib.computeDestinationPoint(coords, maxDistance, 270).longitude;
+
+        query = Super.find({
+          "location.lat": {$gt: latitudeLower, $lt: latitudeUpper},
+          "location.long": {$gt: longitudeLower, $lt: longitudeUpper}
+        });
+      }
+
+      query
       .populate(populateQuery)
       .exec(function(err, supers) {
         if (err)
           return res.send(err);
 
-        res.json(supers);
+        // Afegim distancia a cada super
+        var augmented = supers.map(function(s){
+          return addDistance(s, req);
+        });
+
+        res.json(augmented);
       });
     });
-
-  router.get('/supers/coords', function(req, res){
-    // var loc = require('../location');
-    // loc.findLocation(req, res);
-
-    var maxDistance = req.query.distance || 1000;  // Metres. 1km default
-
-    var coords = {
-      latitude: req.query.latitude,
-      longitude: req.query.longitude
-    }
-
-    var latitudeUpper = geolib.computeDestinationPoint(coords, maxDistance, 0).latitude;
-    var latitudeLower = geolib.computeDestinationPoint(coords, maxDistance, 180).latitude;
-    var longitudeUpper = geolib.computeDestinationPoint(coords, maxDistance, 90).longitude;
-    var longitudeLower = geolib.computeDestinationPoint(coords, maxDistance, 270).longitude;
-
-    Super
-      .find({
-        "location.lat": {$gt: latitudeLower, $lt: latitudeUpper},
-        "location.long": {$gt: longitudeLower, $lt: longitudeUpper}
-      })
-      .exec(function(err, supers) {
-        if (err)
-          return res.send(err);
-
-        res.send(supers);
-      });
-  });
 
   router.route('/supers/:super_id')
     .get(function(req, res) {
@@ -87,8 +109,8 @@ module.exports = function(router) {
         if (err)
           return res.send(err);
 
-        res.json(superM);
-        });
+        res.json(addDistance(superM, req));
+      });
     })
     .put(function(req, res) {
       var superUpdated = {};
