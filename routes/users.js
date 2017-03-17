@@ -6,13 +6,24 @@ router.route('/users')
   // create a user (accessed at POST http://localhost:8080/users)
   .post(function(req, res) {
     var user = new User();      // create a new instance of the User model
-      // save the user and check for errors
-      user.save(function(err, u) {
-        if (err)
-          return res.send(err);
+    user.firebaseId = req.body.firebaseId;
 
-        res.json({ message: 'User created!', userId: u.id});
-      });
+    User.findOne({firebaseId: req.body.firebaseId}, function (err, userFound) {
+      if(err)
+        console.log(err);
+      if (userFound) {
+        return res.json({message: 'This user already exists', userId: userFound.id});
+      }
+      else {
+        // save the user and check for errors
+        user.save(function(err, u) {
+          if (err)
+            return res.send(err);
+
+          res.json({ message: 'User created!', userId: u.id});
+        });
+      }
+    });
   })
   .get(function(req, res) {
     User.find(function(err, users) {

@@ -105,7 +105,7 @@ module.exports = function(router) {
     });
 
     router.route('/stores/:store_id/users/:user_id')
-     .post(function(req, res){
+     .put(function(req, res){
        Store.find({
          users: req.params.user_id
        }, function(err, store){
@@ -130,6 +130,7 @@ module.exports = function(router) {
               fcm.FCMNotificationBuilder()
                 .setTopic('store.' + foundStore._id)
                 .addData('usersTurn', foundStore.usersTurn)
+                .addData('storeQueue',foundStore.users.length)
                 .send(function(err, res) {
                   if (err)
                     console.log('FCM error:', err);
@@ -175,6 +176,7 @@ module.exports = function(router) {
         res.json({storeTurn: foundStore.storeTurn});
         });
     })
+    // Avança el torn i elimina el ultim usuari de la llista
     .put(function(req, res){
       Store.findById(req.params.store_id , function (err, foundStore){
         if (err)
@@ -212,11 +214,12 @@ module.exports = function(router) {
           fcm.FCMNotificationBuilder()
             .setTopic('store.' + foundStore._id)
             .addData('storeTurn', foundStore.storeTurn)
+            .addData('storeQueue',foundStore.users.length)
             .send(function(err, res) {
               if (err)
                 console.log('FCM error:', err);
             });
-
+            console.log(foundStore.users.length);
           res.json({ message: 'StoreTurn updated',  storeTurn: foundStore.storeTurn});
         });
       });
