@@ -57,8 +57,13 @@ request(URL)
           stores: _(o).pickBy(function(v, k) {
               return k!=='parking'&&v==='y';
             })
-            .flatMap(function(v, k) {
-              return {name: k};
+            .map(function(v, k) {
+              return {name: {
+                charcuterieDesk: 'Charcuteria',
+                bakeryDesk: 'Panaderia',
+                meatDesk: 'Carniceria',
+                fishDesk: 'Peixateria'}[k]
+              };
             })
             .value()
         };
