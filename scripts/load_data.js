@@ -22,7 +22,7 @@ prc.on('close', function(){
   console.log('Done. Loading supers and Stores...')
   var json = JSON.parse(fs.readFileSync(sourceFile, 'utf8'));
 
-  _async.eachLimit(json.supers, 3, function(aSuper, cb) {
+  _async.eachSeries(json.supers, function(aSuper, cb) {
     request({
       url: config.node.address + "/supers",
       method: 'POST',
@@ -44,7 +44,7 @@ prc.on('close', function(){
 
       aSuper.id = body.id;
 
-      _async.each(aSuper.stores, function(store, cb2) {
+      _async.eachSeries(aSuper.stores, function(store, cb2) {
         request({
           url: config.node.address + "/stores",
           method: 'POST',
