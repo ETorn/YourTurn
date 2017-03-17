@@ -30,9 +30,11 @@
   },
   "devDependencies": {
     "async": "^2.1.5",
+    "event-stream": "^3.3.4",
     "expect.js": "^0.3.1",
     "istanbul": "^0.4.5",
     "istanbul-middleware": "^0.2.2",
+    "lodash": "^4.17.4",
     "mocha": "^3.2.0",
     "request": "^2.79.0"
   }

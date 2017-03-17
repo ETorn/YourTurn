@@ -2,6 +2,7 @@ var config = require('../config');
 var request = require('request');
 var fs = require('fs');
 var spawn = require('child_process').spawn;
+var _async = require('async');
 
 var sourceFile = process.argv[2] || config.dataFile;
 
@@ -21,9 +22,7 @@ prc.on('close', function(){
   console.log('Done. Loading supers and Stores...')
   var json = JSON.parse(fs.readFileSync(sourceFile, 'utf8'));
 
-  for (var i = 0; i < json.supers.length; i++) {
-    var aSuper = json.supers[i];
-
+  _async.eachLimit(json.supers, 3, function(aSuper, cb) {
     request({
       url: config.node.address + "/supers",
       method: 'POST',
@@ -45,9 +44,7 @@ prc.on('close', function(){
 
       aSuper.id = body.id;
 
-      for (var i = 0; i < aSuper.stores.length; i++) {
-        var store = aSuper.stores[i];
-
+      _async.each(aSuper.stores, function(store, cb2) {
         request({
           url: config.node.address + "/stores",
           method: 'POST',
@@ -63,8 +60,13 @@ prc.on('close', function(){
           }
 
           process.stdout.write('s');
+
+          cb2();
         });
-      }
+      }, function(err) {cb(err);})
     });
-  }
+  }, function(err) {
+    console.log();
+    console.log('Done');
+  });
 });
