@@ -6,6 +6,7 @@
   "scripts": {
     "test": "mocha test",
     "start": "node index.js",
+    "restart": "nodemon index.js",
     "coverage": "node index.js coverage",
     "mongo": "node scripts/start_mongo.js",
     "load_data": "node scripts/load_data.js"
@@ -36,6 +37,7 @@
     "istanbul-middleware": "^0.2.2",
     "lodash": "^4.17.4",
     "mocha": "^3.2.0",
+    "nodemon": "^1.11.0",
     "request": "^2.79.0"
   }
 }
