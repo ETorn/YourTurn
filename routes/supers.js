@@ -141,17 +141,6 @@ module.exports = function(router) {
         });
     });
 
-  //Probablement es borrara en un futur
-  router.post('/supers/:super_id/addStore/:store_id', function(req, res){
-    // save the store and check for errors
-    Super.update({_id: req.params.super_id}, {$push: {stores: req.params.store_id}}, function (err, raw){
-      if (err)
-        return res.send(err);
-
-      res.json({ message: 'Store created in super!' });
-    });
-  });
-
   router.route('/supers/:super_id/totems')
   .get(function(req, res){
     Super.findById(req.params.super_id, function(err, foundSupers) {
