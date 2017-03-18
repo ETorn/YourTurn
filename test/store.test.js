@@ -253,14 +253,14 @@ describe('Stores', function() {
         });
       });
 
-      it('POST should add an user to the store queue', function(done) {
+      it('PUT should add an user to the store queue', function(done) {
 
         expect(storeId).not.to.be(null);
         expect(userId).not.to.be(null);
 
         request({
           url: config.node.address + "/stores/" + storeId + '/users/' + userId,
-          method: 'POST',
+          method: 'PUT',
           json: true
         }, function(err, res, body) {
           expect(err).to.be(null);
@@ -373,7 +373,7 @@ describe('Stores', function() {
 
             request({
               url: config.node.address + "/stores/" + storeId + '/users/' + userId,
-              method: 'POST',
+              method: 'PUT',
               json: true
             }, function(err, res, body) {
               expect(err).to.be(null);
