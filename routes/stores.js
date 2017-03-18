@@ -23,7 +23,7 @@ module.exports = function(router) {
         if (req.body.superId)
           superId = req.body.superId;
         else
-          return res.json({message: 'No super_id specicfied'})
+          return res.json({message: 'No super_id specified'})
 
         store.storeTurn = 1;
         store.usersTurn = 1;

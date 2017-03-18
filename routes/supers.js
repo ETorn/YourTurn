@@ -31,14 +31,31 @@ module.exports = function(router) {
   router.route('/supers')
     .post(function(req, res) {
       var superM = new Super();
+
+      var missingProps = [];
+
       if (req.body.address)
         superM.address = req.body.address;
+      else
+        missingProps.push('address');
+
       if (req.body.city)
         superM.city = req.body.city;
+      else
+        missingProps.push('city');
+
       if (req.body.phone)
         superM.phone = req.body.phone;
+      else
+        missingProps.push('phone');
+
       if (req.body.fax)
         superM.fax = req.body.fax;
+      else
+        missingProps.push('fax');
+
+      if (missingProps.length > 0)
+        return res.send({message: 'Missing properties: ' + missingProps.join(', ')});
 
       superM.stores = [];
       superM.totems = [];
