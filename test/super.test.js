@@ -1,6 +1,9 @@
 var config = require('../config');
 var request = require('request');
 var expect = require('expect.js');
+var combinations = require('combinations');
+var _async = require('async');
+var _ = require('lodash');
 
 describe('Super', function() {
 
@@ -52,6 +55,43 @@ describe('Super', function() {
 
           done();
         });
+      });
+
+      it('should return error if missing any property', function(done) {
+        var allProps = ['city', 'address', 'phone', 'fax'];
+
+        var combos = combinations(allProps);
+        combos.pop();
+
+        combos = combos.map(function(arr) {
+            return _.zipObject(arr, arr.map(function(el) {return 'test' + el}));
+        });
+
+        _async.eachLimit(combos, 1,
+          function(props, cb) {
+            request({
+              url: config.node.address + "/supers",
+              method: 'POST',
+              json: true,
+              body: props
+            }, function(err, res, body) {
+              expect(err).to.be(null);
+              expect(res.statusCode).to.be(200);
+              expect(body).to.have.property('message');
+              expect(body.message).to.match(/Missing properties: /);
+
+              var returnedMissing = body.message
+                .replace('Missing properties: ', '')
+                .split(', ')
+                ;
+
+              expect(_.difference(allProps, _.union(_.keys(props), returnedMissing))).to.be.empty();
+
+              cb();
+            });
+          },
+          function(err) {done();}
+        );
       });
     });
 
