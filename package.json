@@ -6,7 +6,7 @@
   "scripts": {
     "test": "mocha test",
     "start": "node index.js",
-    "restart": "nodemon index.js",
+    "restart": "nodemon --ignore test/ --ignore cli/ index.js",
     "coverage": "node index.js coverage",
     "mongo": "node scripts/start_mongo.js",
     "load_data": "node scripts/load_data.js"
