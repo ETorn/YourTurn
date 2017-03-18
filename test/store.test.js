@@ -15,7 +15,7 @@ describe('Stores', function() {
       method: 'POST',
       json: true,
       body: {
-        name: 'testSuper',
+        city: 'testCity',
         address: 'testAddress',
         phone: 'testPhone',
         fax: 'testFax'
@@ -91,7 +91,7 @@ describe('Stores', function() {
           expect(err).to.be(null);
           expect(res.statusCode).to.be(200);
           expect(body).to.have.property('message');
-          expect(body.message).to.be('No super_id specicfied');
+          expect(body.message).to.be('No super_id specified');
 
           done();
         });
