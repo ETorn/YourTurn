@@ -20,7 +20,11 @@ describe('Super', function() {
             city: 'testCity',
             address: 'testAddress',
             phone: 'testPhone',
-            fax: 'testFax'
+            fax: 'testFax',
+            location: {
+              "lat": 41.385926,
+              "long": 2.105943
+            }
           }
         }, function(err, res, body) {
           expect(err).to.be(null);
@@ -45,7 +49,11 @@ describe('Super', function() {
             city: 'testCity',
             address: 'testAddress',
             phone: 'testPhone',
-            fax: 'testFax'
+            fax: 'testFax',
+            location: {
+              "lat": 41.385926,
+              "long": 2.105943
+            }
           }
         }, function(err, res, body) {
           expect(err).to.be(null);
@@ -58,13 +66,17 @@ describe('Super', function() {
       });
 
       it('should return error if missing any property', function(done) {
-        var allProps = ['city', 'address', 'phone', 'fax'];
+        var allProps = ['city', 'address', 'phone', 'fax', 'location'];
 
         var combos = combinations(allProps);
         combos.pop();
 
         combos = combos.map(function(arr) {
-            return _.zipObject(arr, arr.map(function(el) {return 'test' + el}));
+          return _.zipObject(arr, arr.map(function(el) {
+            return (el === 'location') ?
+              {"lat": 41.385926, "long": 2.105943} :
+              'test' + el;
+          }));
         });
 
         _async.eachLimit(combos, 1,
@@ -130,7 +142,11 @@ describe('Super', function() {
           name: 'testSuper',
           address: 'testAddress',
           phone: 'testPhone',
-          fax: 'testFax'
+          fax: 'testFax',
+          location: {
+            "lat": 41.385926,
+            "long": 2.105943
+          }
         }
       }, function(err, res, body) {
         expect(err).to.be(null);
