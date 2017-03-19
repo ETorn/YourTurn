@@ -18,7 +18,11 @@ describe('Stores', function() {
         city: 'testCity',
         address: 'testAddress',
         phone: 'testPhone',
-        fax: 'testFax'
+        fax: 'testFax',
+        location: {
+          "lat": 41.385926,
+          "long": 2.105943
+        }
       }
     }, function(err, res, body) {
       expect(err).to.be(null);
