@@ -3,17 +3,7 @@ var request = require('request');
 var program = require('commander');
 var _async = require('async');
 
-var getFirstStoreId = function getFirstStoreId(cb) {
-  request({
-    url: config.node.address + "/supers",
-    method: 'GET',
-    json: true
-  }, function(err, res, body) {
-    var storeId = body[0].stores[0]._id;
-
-    cb(null, storeId);
-  });
-};
+var getFirstStoreId = require('./get-first-store-id');
 
 var advanceStoreTurn = function advanceStoreTurn(storeId, cb) {
   request({
@@ -52,7 +42,7 @@ _async.series(
 
   function(err, sid) {
     console.log('Avançant torn a "' + sid + '" ...');
-    advanceStoreTurn(res, function(err, turn) {
+    advanceStoreTurn(sid, function(err, turn) {
       console.log('Torn: ' + turn);
     });
   }
