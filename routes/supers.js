@@ -1,4 +1,5 @@
 var geolib = require('geolib');
+var config = require('../config');
 
 var addDistance = function addDistance(s, req) {
   var s = s.toObject() || s;
@@ -88,7 +89,7 @@ module.exports = function(router) {
       var query = Super.find();
 
       if (req.query.latitude && req.query.longitude) {
-        var maxDistance = req.query.distance || 1000;  // Metres. 1km default
+        var maxDistance = req.query.distance || config.supers.defaultDistance;  // Metres. 1km default
 
         var coords = {
           latitude: req.query.latitude,

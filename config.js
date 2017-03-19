@@ -9,5 +9,8 @@ module.exports = {
   stores: {
     maxTurn: 99
   },
+  supers: {
+    defaultDistance: 1500
+  },
   dataFile: 'config/basedata.json'
 };
