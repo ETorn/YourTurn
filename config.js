@@ -3,7 +3,8 @@ module.exports = {
     address: 'localhost'
   },
   node: {
-    address: 'http://localhost:8080'
+    port: 8080,
+    address: 'http://localhost:8080'  //El port ha de coincidir amb la linia anterior
   },
   stores: {
     maxTurn: 99

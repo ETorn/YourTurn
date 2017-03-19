@@ -54,5 +54,5 @@ app.use(function(err, req, res, next) {
 
 // START THE SERVER
 // =============================================================================
-app.listen(8080);
-console.log('Magic happens on port ' + 8080);
+app.listen(config.node.port);
+console.log('Magic happens on port ' + config.node.port);
