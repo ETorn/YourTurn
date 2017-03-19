@@ -1,8 +1,11 @@
+var l = require('debug')('etorn:index');
+l('WELCOME');
+
 var im = require('istanbul-middleware'),
     isCoverageEnabled = (process.argv[2] == "coverage");
 
 if (isCoverageEnabled) {
-    console.log('Coverage activat! Executa els tests i mira /coverage');
+    l('Coverage activat! Executa els tests i mira /coverage');
     im.hookLoader(__dirname);
 }
 
@@ -16,7 +19,9 @@ var express    = require('express');
 var app        = express();
 
 var mongoose   = require('mongoose');
+l('Connecting to mongo...');
 mongoose.connect('mongodb://' + config.mongodb.address + '/yourturn');
+l('Connected.')
 
 
 // configure app to use bodyParser()
@@ -55,4 +60,4 @@ app.use(function(err, req, res, next) {
 // START THE SERVER
 // =============================================================================
 app.listen(8080);
-console.log('Magic happens on port ' + 8080);
+l('Magic happens on port ' + 8080);
