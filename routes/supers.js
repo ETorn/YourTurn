@@ -54,15 +54,16 @@ module.exports = function(router) {
       else
         missingProps.push('fax');
 
+      if (req.body.location)
+        superM.location = req.body.location;
+      else
+        missingProps.push('location');
+
       if (missingProps.length > 0)
         return res.send({message: 'Missing properties: ' + missingProps.join(', ')});
 
       superM.stores = [];
       superM.totems = [];
-
-      if (req.body.location) {
-        superM.location = req.body.location;
-      }
 
       Super.findOne({address: superM.address}, function (err, superMrk) {
           if(err)
