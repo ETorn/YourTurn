@@ -2,12 +2,30 @@
     "supers": [
         {
             "city": "Barcelona",
-            "address": "Ausàs March",
+            "address": "Ausiàs March",
             "phone": "123456789",
             "fax": "123456789",
             "location": {
               "lat": 41.385926,
               "long": 2.105943
+            },
+            "stores": [
+                {
+                    "name": "Carniceria01"
+                },
+                {
+                    "name": "Peixateria01"
+                }
+            ]
+        },
+        {
+            "city": "Barcelona",
+            "address": "Caprabo Glories",
+            "phone": "123456789",
+            "fax": "123456789",
+            "location": {
+              "lat": 41.401936,
+              "long": 2.193397
             },
             "stores": [
                 {
