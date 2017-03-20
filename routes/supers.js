@@ -28,6 +28,7 @@ var addDistance = function addDistance(s, req) {
 module.exports = function(router) {
   var Super = require('../models/Super');
   var _async = require('async');
+  var _ = require('lodash');
 
   router.route('/supers')
     .post(function(req, res) {
@@ -118,7 +119,7 @@ module.exports = function(router) {
           return addDistance(s, req);
         });
 
-        res.json(augmented);
+        res.json(_.sortBy(augmented,'distance'));
       });
     });
 
