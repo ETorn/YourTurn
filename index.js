@@ -1,8 +1,12 @@
+var l = require('debug')('etorn:index');
+var l2 = require('debug')('etorn:mqtt');
+l('WELCOME');
+
 var im = require('istanbul-middleware'),
     isCoverageEnabled = (process.argv[2] == "coverage");
 
 if (isCoverageEnabled) {
-    console.log('Coverage activat! Executa els tests i mira /coverage');
+    l('Coverage activat! Executa els tests i mira /coverage');
     im.hookLoader(__dirname);
 }
 
@@ -19,7 +23,9 @@ var app        = express();
 var cors = require("cors");
 
 var mongoose   = require('mongoose');
+l('Connecting to mongo...');
 mongoose.connect('mongodb://' + config.mongodb.address + '/yourturn');
+l('Connected.')
 
 var server = new mosca.Server({
     port: 1883,
@@ -29,37 +35,37 @@ server.on('ready', setup);
 
 // fired when a client is connected
 server.on('clientConnected', function(client) {
-  console.log('Client connected', client.id);
+  l2('Client connected: Client=%s', client.id);
 });
 
 // fired when a message is received
 server.on('published', function(packet, client) {
-  console.log('Published: ', packet.topic, packet.payload);
+  l2('Published: Topic=%s Payload=%s', packet.topic, packet.payload);
 });
 
 // fired when a client subscribes to a topic
 server.on('subscribed', function(topic, client) {
-  console.log('Subscribed: ', client.id, topic);
+  l2('Subscribed: Client=%s Topic=%s', client.id, topic);
 });
 
 // fired when a client subscribes to a topic
 server.on('unsubscribed', function(topic, client) {
-  console.log('Unsubscribed: ', client.i, topic);
+  l2('Unsubscribed: Client=%s Topic=%s', client.i, topic);
 });
 
 // fired when a client is disconnecting
 server.on('clientDisconnecting', function(client) {
-  console.log('clientDisconnecting: ', client.id);
+  l2('Disconnecting: Client=%s', client.id);
 });
 
 // fired when a client is disconnected
 server.on('clientDisconnected', function(client) {
-  console.log('clientDisconnected: ', client.id);
+  l2('Disconnected: Client=%s', client.id);
 });
 
 // fired when the mqtt server is ready
 function setup() {
-    console.log('Mosca listening on 1883');
+    l2('Mosca listening on 1883');
 }
 
 var mqttClient = mqtt.connect(config.mqtt.address, {clientId: 'mqtt_local'});
@@ -101,4 +107,4 @@ app.use(function(err, req, res, next) {
 // START THE SERVER
 // =============================================================================
 app.listen(config.node.port);
-console.log('Express listening on ' + config.node.port);
+l('Express listening on ' + config.node.port);
