@@ -7,7 +7,7 @@ var SuperSchema   = new Schema({
     phone: String,
     fax: String,
     stores: [{type: Schema.ObjectId, ref: "Store"}],
-    totems: [{type: Schema.ObjectId, ref: "Totems"}],
+    totems: [{type: Schema.ObjectId, ref: "Totem"}],
     location: {
       lat: Number,
       long: Number

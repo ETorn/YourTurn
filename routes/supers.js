@@ -27,6 +27,8 @@ var addDistance = function addDistance(s, req) {
 
 module.exports = function(router) {
   var Super = require('../models/Super');
+  var Totem = require('../models/Totem');
+
   var _async = require('async');
   var _ = require('lodash');
 
@@ -85,7 +87,7 @@ module.exports = function(router) {
       });
     })
     .get(function(req, res) {
-      var populateQuery = [{path:'stores'}];
+      var populateQuery = [{path:'stores'}, {path: 'totems'}];
 
       var query = Super.find();
 
@@ -141,6 +143,9 @@ module.exports = function(router) {
         superUpdated.fax = req.body.fax;
       if (req.body.stores)
         superUpdated.stores = req.body.stores;
+      if (req.body.totems)
+        superUpdated.totems = req.body.totems;
+
 
       // update the super
       Super.update({_id: req.params.super_id}, superUpdated, function (err, raw){

@@ -16,6 +16,14 @@
                 {
                     "name": "Peixateria01"
                 }
+            ],
+            "totems": [
+              {
+                "identifier": "C001"
+              },
+              {
+                "identifier": "C002"
+              }
             ]
         },
         {
@@ -34,6 +42,14 @@
                 {
                     "name": "Peixateria01"
                 }
+            ],
+            "totems": [
+              {
+                "identifier": "C003"
+              },
+              {
+                "identifier": "C004"
+              }
             ]
         },
         {
@@ -52,6 +68,14 @@
                 {
                     "name": "Peixateria01"
                 }
+            ],
+            "totems": [
+              {
+                "identifier": "C005"
+              },
+              {
+                "identifier": "C006"
+              }
             ]
         }
     ]

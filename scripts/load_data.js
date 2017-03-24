@@ -63,7 +63,29 @@ prc.on('close', function(){
 
           cb2();
         });
-      }, function(err) {cb(err);})
+      },
+      function(err) {cb(err);})
+
+      _async.eachSeries(aSuper.totems, function(totem, cb2) {
+        request({
+          url: config.node.address + "/totems",
+          method: 'POST',
+          json: true,
+          body: {
+            identifier: totem.identifier,
+            superId: aSuper.id
+          }
+        }, function(err, res, body) {
+          if (err || res.statusCode != 200) {
+            console.log(err);
+            return;
+          }
+
+          process.stdout.write('s');
+
+          cb2();
+        });
+      });
     });
   }, function(err) {
     console.log();
