@@ -2,6 +2,9 @@ module.exports = {
   mongodb: {
     address: 'localhost'
   },
+  mqtt: {
+    address: 'mqtt://localhost'
+  },
   node: {
     port: 8080,
     address: 'http://localhost:8080'  //El port ha de coincidir amb la linia anterior

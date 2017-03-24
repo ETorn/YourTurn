@@ -72,7 +72,7 @@ module.exports.getStoreById = function getStoreById(id, cb) {
     if (err)
       return cb(err);
 
-    cb(null, foundStore ? computeQueue(foundStore) : nullº);
+    cb(null, foundStore ? computeQueue(foundStore) : null);
   });
 };
 

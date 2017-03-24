@@ -12,6 +12,8 @@ if (isCoverageEnabled) {
 var config = require('./config');
 
 // Require dependencies
+var mosca = require('mosca');
+var mqtt = require('mqtt');
 var express    = require('express');
 var app        = express();
 var cors = require("cors");
@@ -19,6 +21,48 @@ var cors = require("cors");
 var mongoose   = require('mongoose');
 mongoose.connect('mongodb://' + config.mongodb.address + '/yourturn');
 
+var server = new mosca.Server({
+    port: 1883,
+});
+
+server.on('ready', setup);
+
+// fired when a client is connected
+server.on('clientConnected', function(client) {
+  console.log('Client connected', client.id);
+});
+
+// fired when a message is received
+server.on('published', function(packet, client) {
+  console.log('Published: ', packet.topic, packet.payload);
+});
+
+// fired when a client subscribes to a topic
+server.on('subscribed', function(topic, client) {
+  console.log('Subscribed: ', client.id, topic);
+});
+
+// fired when a client subscribes to a topic
+server.on('unsubscribed', function(topic, client) {
+  console.log('Unsubscribed: ', client.i, topic);
+});
+
+// fired when a client is disconnecting
+server.on('clientDisconnecting', function(client) {
+  console.log('clientDisconnecting: ', client.id);
+});
+
+// fired when a client is disconnected
+server.on('clientDisconnected', function(client) {
+  console.log('clientDisconnected: ', client.id);
+});
+
+// fired when the mqtt server is ready
+function setup() {
+    console.log('Mosca listening on 1883');
+}
+
+var mqttClient = mqtt.connect(config.mqtt.address, {clientId: 'mqtt_local'});
 
 // configure app to use bodyParser()
 // this will let us get the data from a POST
@@ -32,10 +76,10 @@ app.use(cors());
 var router = express.Router();              // get an instance of the express Router
 
 // REGISTER OUR ROUTES -------------------------------
-require ('./routes/users') (router);
-require ('./routes/stores') (router);
-require ('./routes/supers') (router);
-require ('./routes/totems') (router);
+require ('./routes/users') (router, mqttClient);
+require ('./routes/stores') (router, mqttClient);
+require ('./routes/supers') (router, mqttClient);
+require ('./routes/totems') (router, mqttClient);
 app.use('/', router);
 
 if (isCoverageEnabled) {
@@ -57,4 +101,4 @@ app.use(function(err, req, res, next) {
 // START THE SERVER
 // =============================================================================
 app.listen(config.node.port);
-console.log('Magic happens on port ' + config.node.port);
+console.log('Express listening on ' + config.node.port);

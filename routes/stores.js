@@ -11,7 +11,49 @@ var getStoreTurn = funcs.getStoreTurn;
 var getStoreQueue = funcs.getStoreQueue;
 var advanceStoreTurn = funcs.advanceStoreTurn;
 
-module.exports = function(router) {
+
+module.exports = function(router, mqttClient) {
+
+  mqttClient.subscribe('etorn/store/+/advance');
+  mqttClient.subscribe('etorn/store/+/idk');
+
+  mqttClient.on('message', function(topic, message) {
+    var match = /etorn\/store\/(\w{24})\/(\w+)/.exec(topic);
+    var id = match[1];
+    var chan = match[2];
+
+    if (!match)
+      return;
+
+    if (chan === 'idk')
+      publishUpdate(id);
+
+    if (chan === 'advance') {
+      advanceStoreTurn(match[1], function(err, result) {
+        if (err)
+          return;
+
+        mqttClient.publish('etorn/store/' + match[1] + '/storeTurn', '' + result);
+
+        getStoreQueue(match[1], function(err, queue) {
+          if (!err)
+            mqttClient.publish('etorn/store/' + match[1] + '/queue', '' + queue);
+        });
+      });
+    }
+  });
+
+  var publishUpdate = function(id) {
+    getStoreTurn(id, function(err, result) {
+      if (!err)
+        mqttClient.publish('etorn/store/' + id + '/storeTurn', '' + result);
+    });
+
+    getStoreQueue(id, function(err, queue) {
+      if (!err)
+        mqttClient.publish('etorn/store/' + id + '/queue', '' + queue);
+    });
+  };
 
   router.route('/stores')
     .post(function(req, res) {
@@ -116,6 +158,13 @@ module.exports = function(router) {
       advanceStoreTurn(req.params.store_id, function(err, result) {
         if (err)
           res.json({message: err});
+
+        mqttClient.publish('etorn/store/' + req.params.store_id + '/storeTurn', '' + result);
+
+        getStoreQueue(req.params.store_id, function(err, queue) {
+          if (!err)
+            mqttClient.publish('etorn/store/' + req.params.store_id + '/queue', '' + queue);
+        });
 
         res.json({message: 'StoreTurn updated', storeTurn: result});
       });
