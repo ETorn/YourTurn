@@ -1,5 +1,6 @@
 var FCM = require('fcm-node');
 var apikey = require('./fcm-creds').apikey;
+var l = require('debug')('etorn:fcm');
 
 var fcm = new FCM(apikey);
 
@@ -48,7 +49,6 @@ module.exports.FCMNotificationBuilder = function() {
     },
 
     build: function() {
-      console.log(message);
       if (!message.to)
         throw 'Destination unspecified!';
 
@@ -59,7 +59,9 @@ module.exports.FCMNotificationBuilder = function() {
     },
 
     send: function(cb) {
-      fcm.send(this.build(), cb);
+      var msg = this.build();
+      l('Notification sent: %o', msg);
+      fcm.send(msg, cb);
     }
   };
 };

@@ -1,7 +1,6 @@
 var config = require('../config');
-var request = require('request');
 var expect = require('expect.js');
-
+var request = require('request');
 var series = require('async').series;
 
 describe('Stores', function() {

@@ -1,5 +1,5 @@
 var geolib = require('geolib');
-var config = require('../config');
+var l = require('debug')('etorn:routes:supers');
 
 var addDistance = function addDistance(s, req) {
   var s = s.toObject() || s;
@@ -34,6 +34,8 @@ module.exports = function(router) {
 
   router.route('/supers')
     .post(function(req, res) {
+      l('New super registration');
+
       var superM = new Super();
 
       var missingProps = [];
@@ -63,36 +65,46 @@ module.exports = function(router) {
       else
         missingProps.push('location');
 
-      if (missingProps.length > 0)
+      if (missingProps.length > 0) {
+        l('Missing properties: %s', missingProps);
         return res.send({message: 'Missing properties: ' + missingProps.join(', ')});
+      }
 
       superM.stores = [];
       superM.totems = [];
 
       Super.findOne({address: superM.address}, function (err, superMrk) {
-          if(err)
-            console.log(err);
+          if(err) {
+            l('Super find query failed: %s', err);
+            return res.send(err);
+          }
 
           if (superMrk){
+            l('A super with this address already exists (%s)', superM.address);
             return res.json({message: 'This super already exists'});
 
           } else {
             superM.save(function(err, newSuper) {
-              if (err)
+              if (err) {
+                l('Error saving new super: %s', err);
                 return res.send(err);
+              }
 
+              l('Super saved successfully (%s)', newSuper.id);
               res.json({ message: 'Super created!', id: newSuper.id});
             });
           }
       });
     })
     .get(function(req, res) {
+      l('Supers list requested');
       var populateQuery = [{path:'stores'}, {path: 'totems'}];
 
       var query = Super.find();
 
       if (req.query.latitude && req.query.longitude) {
         var maxDistance = req.query.distance || config.supers.defaultDistance;  // Metres. 1km default
+        l('request contains location data. Result will be delimited');
 
         var coords = {
           latitude: req.query.latitude,
@@ -110,31 +122,39 @@ module.exports = function(router) {
         });
       }
 
+      l('Querying mongo');
       query
       .populate(populateQuery)
       .exec(function(err, supers) {
-        if (err)
+        if (err) {
+          l('Query failed: %s', err);
           return res.send(err);
+        }
 
         // Afegim distancia a cada super
         var augmented = supers.map(function(s){
           return addDistance(s, req);
         });
 
+        l('Returning %d results', augmented.length);
         res.json(_.sortBy(augmented,'distance'));
       });
     });
 
   router.route('/supers/:super_id')
     .get(function(req, res) {
+      l('Request for super (%s)', req.params.super_id);
       Super.findById(req.params.super_id, function(err, superM) {
-        if (err)
+        if (err) {
+          l('Query failed: %s', err);
           return res.send(err);
+        }
 
         res.json(addDistance(superM, req));
       });
     })
     .put(function(req, res) {
+      l('Updating super (%s)', req.params.super_id);
       var superUpdated = {};
 
       if (req.body.phone)
@@ -149,28 +169,38 @@ module.exports = function(router) {
 
       // update the super
       Super.update({_id: req.params.super_id}, superUpdated, function (err, raw){
-        if (err)
+        if (err) {
+          l('Query failed: %s', err);
           return res.send(err);
+        }
 
+        l('Super updated successfully (%s)', req.params.super_id);
         res.json({ message: 'Super updated!' });
       });
     })
     .delete(function(req, res) {
+      l('Deleting super (%s)', req.params.super_id);
       Super.remove({
         _id: req.params.super_id
       }, function(err, superM) {
-        if (err)
+        if (err) {
+          l('Query failed: %s', err);
           return res.send(err);
+        }
 
+        l('Super successfully removed super (%s)', req.params.super_id);
         res.json({ message: 'Successfully deleted' });
-        });
+      });
     });
 
   router.route('/supers/:super_id/totems')
   .get(function(req, res){
+    l('Request totems for super (%s)', req.params.super_id);
     Super.findById(req.params.super_id, function(err, foundSupers) {
-      if (err)
+      if (err) {
+        l('Query failed: %s', err);
         return res.send(err);
+      }
 
       res.json({totems: foundSupers.totems});
     });
@@ -178,23 +208,31 @@ module.exports = function(router) {
 
   router.route('/supers/:super_id/totems/:totem_id')
   .post(function(req, res){
+    l('Adding totem to super (%s -> %s)', req.params.totem_id, req.params.super_id);
     Super.findByIdAndUpdate({
       _id: req.params.super_id
     }, {$push: {totems: req.params.totem_id}},
     {safe: true, upsert: true, new: true}, function (err, foundSuper){
-      if (err)
-         return res.send(err);
+      if (err) {
+        l('Query failed: %s', err);
+        return res.send(err);
+      }
 
+      l('Successfully aded totem to super (%s -> %s)', req.params.totem_id, req.params.super_id);
       res.json({ message: 'Totem added to super!'});
     });
   })
   .delete(function(req, res){
+    l('Removing totem from super (%s -> %s)', req.params.totem_id, req.params.super_id);
     Super.update({
       _id: req.params.super_id
     }, {$pull: {totems: req.params.totem_id}}, {multi: true}, function(err, totem) {
-      if (err)
+      if (err) {
+        l('Query failed: %s', err);
         return res.send(err);
+      }
 
+      l('Sucessfully removed totem from super (%s -> %s)', req.params.totem_id, req.params.super_id);
       res.json({ message: 'Successfully deleted totem'});
     });
   });

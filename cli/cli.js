@@ -1,7 +1,7 @@
-var config = require('../config');
-var request = require('request');
-var program = require('commander');
 var _async = require('async');
+var config = require('../config');
+var program = require('commander');
+var request = require('request');
 
 program
   .version('0.0.1')

@@ -1,8 +1,8 @@
-var config = require('../config');
-var request = require('request');
-var fs = require('fs');
-var spawn = require('child_process').spawn;
 var _async = require('async');
+var config = require('../config');
+var fs = require('fs');
+var request = require('request');
+var spawn = require('child_process').spawn;
 
 var sourceFile = process.argv[2] || config.dataFile;
 

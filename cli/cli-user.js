@@ -1,7 +1,7 @@
-var config = require('../config');
-var request = require('request');
-var program = require('commander');
 var _async = require('async');
+var config = require('../config');
+var program = require('commander');
+var request = require('request');
 
 var getFirstStoreId = require('./get-first-store-id');
 

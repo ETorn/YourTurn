@@ -1,6 +1,6 @@
 var config = require('../config');
-var request = require('request');
 var expect = require('expect.js');
+var request = require('request');
 
 describe.skip('Users', function() {
   describe('POST /users', function() {

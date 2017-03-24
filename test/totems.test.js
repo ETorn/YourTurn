@@ -1,8 +1,8 @@
 var config = require('../config');
-var request = require('request');
 var expect = require('expect.js');
+var request = require('request');
 
-describe('Totems', function() {
+describe.skip('Totems', function() {
   describe('Creation and deletion', function() {
 
     var totemId = null

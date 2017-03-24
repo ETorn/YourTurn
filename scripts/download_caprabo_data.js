@@ -1,7 +1,7 @@
+var _ = require('lodash');
+var es = require('event-stream');
 var fs = require('fs');
 var request = require('request');
-var es = require('event-stream');
-var _ = require('lodash');
 
 var URL = 'https://www.caprabo.com/system/modules/com.caprabo.mrmmccann.caprabocom.formatters/resources/js/localizador.js';
 

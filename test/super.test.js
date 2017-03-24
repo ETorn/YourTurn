@@ -1,9 +1,9 @@
-var config = require('../config');
-var request = require('request');
-var expect = require('expect.js');
-var combinations = require('combinations');
-var _async = require('async');
 var _ = require('lodash');
+var _async = require('async');
+var combinations = require('combinations');
+var config = require('../config');
+var expect = require('expect.js');
+var request = require('request');
 
 describe('Super', function() {
 
@@ -268,7 +268,7 @@ describe('Super', function() {
       });
     });
 
-    describe('Totem functionality', function() {
+    describe.skip('Totem functionality', function() {
 
       var totemId = null
 
