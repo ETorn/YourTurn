@@ -11,8 +11,10 @@ module.exports = function(router) {
       if (req.body.identifier)
         totem.identifier = req.body.identifier;
 
-      if (req.body.superId)
+      if (req.body.superId) {
         superId = req.body.superId;
+        totem.superId = req.body.superId;
+      }
       else
         return res.json({message: 'No super_id specified'})
 
@@ -56,6 +58,14 @@ module.exports = function(router) {
         res.json(totem);
       });
     });
+
+  .get(function(req, res) {
+      if (err)
+        return res.send(err);
+
+      res.json({superId: totem.superId});
+    });
+  });
 
   router.route('/totems/:totem_id')
     .get(function(req, res) {
