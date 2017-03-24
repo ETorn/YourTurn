@@ -59,7 +59,9 @@ module.exports = function(router) {
       });
     });
 
+  router.route('/totems/:totemidentifier')
   .get(function(req, res) {
+    Totem.findOne({identifier: req.params.totemidentifier},  function(err, totem) {
       if (err)
         return res.send(err);
 
