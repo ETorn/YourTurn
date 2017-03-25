@@ -2,7 +2,56 @@ var config = require('../config');
 var expect = require('expect.js');
 var request = require('request');
 
-describe.skip('Totems', function() {
+describe('Totems', function() {
+
+  var superId = null;
+
+  beforeEach(function(done) {
+
+    expect(superId).to.be(null);
+
+    request({
+      url: config.node.address + "/supers",
+      method: 'POST',
+      json: true,
+      body: {
+        city: 'testCity',
+        address: 'testAddress',
+        phone: 'testPhone',
+        fax: 'testFax',
+        location: {
+          "lat": 41.385926,
+          "long": 2.105943
+        }
+      }
+    }, function(err, res, body) {
+      expect(err).to.be(null);
+      expect(res.statusCode).to.be(200);
+
+      superId = body.id;
+
+      done();
+    });
+  });
+
+  afterEach(function(done) {
+
+    expect(superId).not.to.be(null);
+
+    request({
+      url: config.node.address + "/supers/" + superId,
+      method: 'DELETE',
+      json: true
+    }, function(err, res, body) {
+      expect(err).to.be(null);
+      expect(res.statusCode).to.be(200);
+
+      superId = null;
+
+      done();
+    });
+  });
+
   describe('Creation and deletion', function() {
 
     var totemId = null
@@ -14,7 +63,7 @@ describe.skip('Totems', function() {
           method: 'POST',
           json: true,
           body: {
-            // Empty body
+            superId: superId
           }
         }, function(err, res, body) {
           expect(err).to.be(null);
@@ -61,12 +110,15 @@ describe.skip('Totems', function() {
     var totemId = null
 
     beforeEach(function(done) {
+
+      expect(totemId).to.be(null);
+
       request({
         url: config.node.address + "/totems",
         method: 'POST',
         json: true,
         body: {
-          // Empty body
+          superId: superId
         }
       }, function(err, res, body) {
         expect(err).to.be(null);

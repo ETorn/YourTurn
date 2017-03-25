@@ -49,7 +49,7 @@ module.exports = function(router) {
                 if (err)
                   return res.json({message: err});
 
-                l('Totem sucessfully saved (%s)', t.id);
+                l('Totem sucessfully saved (%s)', newTotem._id);
                 res.json({ message: 'Totem created!', totemId: newTotem._id, superId: superId});
               });
             });
@@ -67,7 +67,7 @@ module.exports = function(router) {
       });
     });
 
-  router.route('/totems/:totemidentifier')
+  router.route('/totems/identifier/:totemidentifier')
   .get(function(req, res) {
     Totem.findOne({identifier: req.params.totemidentifier},  function(err, totem) {
       if (err)

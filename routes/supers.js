@@ -205,35 +205,4 @@ module.exports = function(router) {
       res.json({totems: foundSupers.totems});
     });
   });
-
-  router.route('/supers/:super_id/totems/:totem_id')
-  .post(function(req, res){
-    l('Adding totem to super (%s -> %s)', req.params.totem_id, req.params.super_id);
-    Super.findByIdAndUpdate({
-      _id: req.params.super_id
-    }, {$push: {totems: req.params.totem_id}},
-    {safe: true, upsert: true, new: true}, function (err, foundSuper){
-      if (err) {
-        l('Query failed: %s', err);
-        return res.send(err);
-      }
-
-      l('Successfully aded totem to super (%s -> %s)', req.params.totem_id, req.params.super_id);
-      res.json({ message: 'Totem added to super!'});
-    });
-  })
-  .delete(function(req, res){
-    l('Removing totem from super (%s -> %s)', req.params.totem_id, req.params.super_id);
-    Super.update({
-      _id: req.params.super_id
-    }, {$pull: {totems: req.params.totem_id}}, {multi: true}, function(err, totem) {
-      if (err) {
-        l('Query failed: %s', err);
-        return res.send(err);
-      }
-
-      l('Sucessfully removed totem from super (%s -> %s)', req.params.totem_id, req.params.super_id);
-      res.json({ message: 'Successfully deleted totem'});
-    });
-  });
 }
