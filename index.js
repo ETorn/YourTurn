@@ -28,7 +28,11 @@ mongoose.connect('mongodb://' + config.mongodb.address + '/yourturn');
 l('Connected.')
 
 var server = new mosca.Server({
-    port: 1883,
+  http: {
+     port: 1884,
+     bundle: true,
+     static: './'
+  }
 });
 
 server.on('ready', setup);
