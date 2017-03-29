@@ -211,6 +211,14 @@ module.exports.advanceStoreTurn = function advanceStoreTurn(id, cb) {
       if (err)
         return cb(err);
 
+      fcm.FCMNotificationBuilder()
+        .setTopic('store.' + foundStore._id)
+        .addData('storeTurn', foundStore.storeTurn)
+        .send(function(err, res) {
+         if (err)
+           console.log('FCM error:', err);
+        });
+
       cb(null, foundStore.storeTurn);
     });
   });
