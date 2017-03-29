@@ -5,9 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha test",
-    "start": "node index.js",
+    "start": "set DEBUG=etorn:* && node index.js",
     "restart": "set DEBUG=etorn:* && nodemon --ignore test/ --ignore cli/ index.js",
-    "coverage": "node index.js coverage",
+    "coverage": "set DEBUG=etorn:* && node index.js coverage",
     "mongo": "node scripts/start_mongo.js",
     "load_data": "node scripts/load_data.js"
   },

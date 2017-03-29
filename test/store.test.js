@@ -236,11 +236,11 @@ describe('Stores', function() {
       it('should update a store');
     });
 
-    describe('POST/DELETE /stores/:store_id/users/:user_id', function(){
+    describe('PUT/DELETE /stores/:store_id/users/:user_id', function(){
 
       var userId;
 
-      it('creting user for this test', function(done) {
+      before(function(done) {
         request({
           url: config.node.address + '/users',
           method: 'POST',
@@ -276,6 +276,31 @@ describe('Stores', function() {
         });
       });
 
+      it('Should return error if the user is already in the queue', function(done) {
+        request({
+          url: config.node.address + "/stores/" + storeId + '/users/' + userId,
+          method: 'PUT',
+          json: true
+        }, function(err, res, body) {
+          expect(err).to.be(null);
+          expect(res.statusCode).to.be(200);
+
+          request({
+            url: config.node.address + "/stores/" + storeId + '/users/' + userId,
+            method: 'PUT',
+            json: true
+          }, function(err, res, body) {
+            expect(err).to.be(null);
+            expect(res.statusCode).to.be(200);
+            expect(body).to.have.property('message');
+            expect(body.message).to.be('This user already picked a ticket in this store!');
+
+            done();
+
+          });
+        });
+      });
+
       it('DELETE should remove an user from the store queue', function(done) {
 
         expect(storeId).not.to.be(null);
@@ -295,7 +320,7 @@ describe('Stores', function() {
         });
       });
 
-      it('removing user for this test', function(done) {
+      after(function(done) {
         request({
           url: config.node.address + '/users/' + userId,
           method: 'DELETE',

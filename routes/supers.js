@@ -150,12 +150,16 @@ module.exports = function(router) {
           return res.send(err);
         }
 
+        console.log(superM);
+
         res.json(addDistance(superM, req));
       });
     })
     .put(function(req, res) {
       l('Updating super (%s)', req.params.super_id);
       var superUpdated = {};
+
+      console.log(req.body);
 
       if (req.body.phone)
         superUpdated.phone = req.body.phone;
@@ -166,8 +170,6 @@ module.exports = function(router) {
       if (req.body.totems)
         superUpdated.totems = req.body.totems;
 
-
-      // update the super
       Super.update({_id: req.params.super_id}, superUpdated, function (err, raw){
         if (err) {
           l('Query failed: %s', err);

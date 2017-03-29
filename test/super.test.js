@@ -239,31 +239,25 @@ describe('Super', function() {
           expect(body).to.have.property('message');
           expect(body.message).to.be('Super updated!');
 
-          done();
-        });
-      });
+          request({
+            url: config.node.address + "/supers/" + id,
+            method: 'GET',
+            json: true
+          }, function(err, res, body) {
+            expect(err).to.be(null);
+            expect(res.statusCode).to.be(200);
+            expect(body).to.have.property('city');
+            expect(body).to.have.property('address');
+            expect(body).to.have.property('phone');
+            expect(body).to.have.property('fax');
+            expect(body.city).to.be('testCity');
+            expect(body.address).to.be('testAddress');
+            expect(body.phone).to.be('updatedPhone');
+            expect(body.fax).to.be('updatedFax');
 
-      it('shouldnt update name nor address', function(done) {
+            done();
 
-        expect(id).not.to.be(null);
-
-        request({
-          url: config.node.address + "/supers/" + id,
-          method: 'GET',
-          json: true
-        }, function(err, res, body) {
-          expect(err).to.be(null);
-          expect(res.statusCode).to.be(200);
-          expect(body).to.have.property('city');
-          expect(body).to.have.property('address');
-          expect(body).to.have.property('phone');
-          expect(body).to.have.property('fax');
-          expect(body.city).to.be('testCity');
-          expect(body.address).to.be('testAddress');
-          expect(body.phone).to.be('updatedPhone');
-          expect(body.fax).to.be('updatedFax');
-
-          done();
+          });
         });
       });
     });
