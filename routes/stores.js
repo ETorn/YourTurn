@@ -1,6 +1,6 @@
 var funcs = require('./store-funcs.js');
 
-var newSuper = funcs.newSuper;
+var newStore = funcs.newStore;
 var getStoreList = funcs.getStoreList;
 var getStoreById = funcs.getStoreById;
 var updateStore = funcs.updateStore;
@@ -58,7 +58,7 @@ module.exports = function(router, mqttClient) {
   router.route('/stores')
     .post(function(req, res) {
 
-      newSuper(req.body, function(err, result) {
+      newStore(req.body, function(err, result) {
         if (err)
           return res.send({message: err});
 
@@ -113,6 +113,7 @@ module.exports = function(router, mqttClient) {
     .put(function(req, res){
 
       addUserToStoreQueue(req.params.user_id, req.params.store_id, function(err, result) {
+        console.log("err, res", err, result);
         if (err)
           return res.json({message: err});
 

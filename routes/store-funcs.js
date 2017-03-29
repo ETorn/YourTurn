@@ -11,8 +11,10 @@ var computeQueue = function(store) {
   return store;
 }
 
-module.exports.newSuper = function newSuper(obj, cb) {
+module.exports.newStore = function newStore(obj, cb) {
   var store = new Store();
+
+  console.log("sdadasdadadsa", obj);
 
   if (obj.name)
     store.name = obj.name;
@@ -102,7 +104,7 @@ module.exports.removeStore = function removeStore(id, cb) {
 };
 
 module.exports.addUserToStoreQueue = function addUserToStoreQueue(uid, sid, cb) {
-  Store.find({users: uid}, function(err, store){
+  Store.find({_id: sid, users: {$elemMatch: {$eq: uid}}}, function(err, store){
     if(err)
       return cb(err);
 
@@ -112,7 +114,7 @@ module.exports.addUserToStoreQueue = function addUserToStoreQueue(uid, sid, cb) 
     Store.findByIdAndUpdate(
       {_id: sid},
       {$push: {users: uid}},
-      {safe: true, upsert: true, new : true},
+      {safe: true, upsert: true, new: true},
       function (err, foundStore){
         if (err)
           return cb(err);
