@@ -117,6 +117,9 @@ module.exports = function(router, mqttClient) {
         if (err)
           return res.json({message: err});
 
+        var disponibleTurn = result+1;
+        mqttClient.publish('etorn/store/' + req.params.store_id + '/usersTurn', '' + disponibleTurn);
+
         res.json({message: 'User added to store queue!', turn: result});
       });
 
