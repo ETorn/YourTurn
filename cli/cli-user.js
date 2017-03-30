@@ -45,6 +45,8 @@ program
       function(err, sid) {
         console.log('Demanant torn a "' + sid + '" ...');
         addUserToStore(firebase, sid, function(err, body) {
+          if (err)
+            return console.log(err);
           if (body.turn)
             console.log('Torn usuari: ' + body.turn);
           else

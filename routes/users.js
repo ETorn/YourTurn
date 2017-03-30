@@ -9,8 +9,6 @@ module.exports = function(router) {
       user.firebaseId = req.body.firebaseId;
 
       User.findOne({firebaseId: req.body.firebaseId}, function (err, userFound) {
-        if(err)
-          console.log(err);
         if (userFound) {
           return res.json({message: 'This user already exists', userId: userFound.id});
         }

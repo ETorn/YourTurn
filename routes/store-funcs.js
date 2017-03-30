@@ -14,8 +14,6 @@ var computeQueue = function(store) {
 module.exports.newStore = function newStore(obj, cb) {
   var store = new Store();
 
-  console.log("sdadasdadadsa", obj);
-
   if (obj.name)
     store.name = obj.name;
 

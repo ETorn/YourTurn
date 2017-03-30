@@ -113,12 +113,16 @@ module.exports = function(router, mqttClient) {
     .put(function(req, res){
 
       addUserToStoreQueue(req.params.user_id, req.params.store_id, function(err, result) {
-        console.log("err, res", err, result);
         if (err)
           return res.json({message: err});
 
         var disponibleTurn = result+1;
         mqttClient.publish('etorn/store/' + req.params.store_id + '/usersTurn', '' + disponibleTurn);
+
+        getStoreQueue(req.params.store_id, function(err, queue) {
+          if (!err)
+            mqttClient.publish('etorn/store/' + req.params.store_id + '/queue', '' + queue);
+        });
 
         res.json({message: 'User added to store queue!', turn: result});
       });
