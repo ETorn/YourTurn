@@ -90,6 +90,7 @@ require ('./routes/users') (router, mqttClient);
 require ('./routes/stores') (router, mqttClient);
 require ('./routes/supers') (router, mqttClient);
 require ('./routes/totems') (router, mqttClient);
+require ('./routes/turns') (router, mqttClient);
 app.use('/', router);
 
 if (isCoverageEnabled) {

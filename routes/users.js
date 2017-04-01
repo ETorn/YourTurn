@@ -23,14 +23,16 @@ module.exports = function(router) {
       });
     })
     .get(function(req, res) {
-      User.find(function(err, users) {
+      User.find()
+      .populate('turns')
+      .exec(function (err, users) {
         if (err)
           return res.send(err);
 
         res.json(users);
-      });
+      })
     });
-
+    
   router.route('/users/:user_id')
     // get the user with that id (accessed at GET http://localhost:8080/users/:user_id)
     .get(function(req, res) {
