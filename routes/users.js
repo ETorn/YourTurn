@@ -7,7 +7,6 @@ module.exports = function(router) {
     .post(function(req, res) {
       var user = new User();      // create a new instance of the User model
       user.firebaseId = req.body.firebaseId;
-
       User.findOne({firebaseId: req.body.firebaseId}, function (err, userFound) {
         if (userFound) {
           return res.json({message: 'This user already exists', userId: userFound.id});
@@ -66,5 +65,16 @@ module.exports = function(router) {
 
         res.json({ message: 'Successfully deleted' });
         });
+    });
+
+    router.route('/users/firebase/:firebase_id')
+    .get(function(req, res) {
+      User.findOne({firebaseId: req.params.firebase_id}, function (err, userFound) {
+        if(err)
+          console.log(err);
+          if (userFound)
+            return res.json({userId: userFound.id});
+          res.json({message: 'User not found'});
+      });
     });
 }
