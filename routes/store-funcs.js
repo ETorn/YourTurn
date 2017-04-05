@@ -4,6 +4,8 @@ var _async = require('async');
 
 var Store = require('../models/Store');
 var Super = require('../models/Super');
+var Turn = require('../models/Turn');
+var User = require('../models/User');
 
 var computeQueue = function(store) {
   store = store.toObject();
@@ -131,6 +133,27 @@ module.exports.addUserToStoreQueue = function addUserToStoreQueue(uid, sid, cb) 
            if (err)
              console.log('FCM error:', err);
           });
+
+
+        var turn = new Turn();
+        turn.storeId = foundStore._id;
+        turn.turn = userTurn;
+        turn.userId = uid;
+
+        turn.save(function(err, newTurn) {
+          if (err)
+            return cb(err);
+
+            User.findByIdAndUpdate(
+              {_id: uid},
+              {$push: {turns: newTurn._id}},
+              {safe: true, upsert: true, new: true},
+              function (err, foundUser) {
+                if (err)
+                  return cb(err);
+              }
+            )
+        });
 
         foundStore.save(function(err) {
           if (err)

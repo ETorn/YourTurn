@@ -71,11 +71,15 @@ module.exports = function(router) {
 
     router.route('/users/firebase/:firebase_id')
     .get(function(req, res) {
-      User.findOne({firebaseId: req.params.firebase_id}, function (err, userFound) {
+      User.findOne({firebaseId: req.params.firebase_id})
+      .populate('turns')
+      .exec(function (err, userFound) {
         if(err)
           console.log(err);
-          if (userFound)
-            return res.json({userId: userFound.id});
+          if (userFound) {
+            console.log("usuari trobat", userFound);
+            return res.send(userFound);
+          }
           res.json({message: 'User not found'});
       });
     });

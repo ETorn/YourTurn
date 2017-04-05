@@ -3,6 +3,7 @@ var Schema       = mongoose.Schema;
 
 var TurnSchema   = new Schema({
     storeId: String,
+    userId: String,
     turn: Number
 });
 

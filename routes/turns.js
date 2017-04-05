@@ -15,8 +15,10 @@ module.exports = function(router) {
       else
         return res.json({message: 'No store_id specified'})
 
-      if (req.body.userId)
+      if (req.body.userId) {
         userId = req.body.userId;
+        turn.userId = req.body.userId;
+      }
       else
         return res.json({message: 'No user_id specified'})
 
@@ -43,14 +45,13 @@ module.exports = function(router) {
               if (turnFound)
                 return res.json({message: 'This turn already exists'});
             }
-            // save the super and check for errors
+            // save the turn and check for errors
             turn.save(function(err, newTurn) {
               if (err) {
                 l('Turn save failed: %s', err);
                 return res.json({message: err});
               }
 
-              // save the totem and check for errors
               var user = new User();
               User.update({_id: userId}, {$push: {turns: turn._id}}, function (err, raw){
                 if (err)
