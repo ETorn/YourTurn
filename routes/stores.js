@@ -10,6 +10,8 @@ var removeUserFromStoreQueue = funcs.removeUserFromStoreQueue;
 var getStoreTurn = funcs.getStoreTurn;
 var getStoreQueue = funcs.getStoreQueue;
 var advanceStoreTurn = funcs.advanceStoreTurn;
+var postEvent = funcs.postEvent;
+var getAverageTime = funcs.getAverageTime;
 
 
 module.exports = function(router, mqttClient) {
@@ -118,6 +120,19 @@ module.exports = function(router, mqttClient) {
 
         var disponibleTurn = result+1;
         mqttClient.publish('etorn/store/' + req.params.store_id + '/usersTurn', '' + disponibleTurn);
+
+        postEvent('advanced turn', req.params.store_id, function(err,response) {
+          if (err)
+            return res.json({message: err});
+          console.log('advanced turn');
+        });
+
+        getAverageTime(req.params.store_id, function(err, time) {
+          if (err)
+            return res.json({message: err});
+
+          mqttClient.publish('etorn/store/' + req.params.store_id + '/aproxTime', '' + time);
+        });
 
         getStoreQueue(req.params.store_id, function(err, queue) {
           if (!err)

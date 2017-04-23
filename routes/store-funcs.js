@@ -1,6 +1,7 @@
 var config = require('../config');
 var fcm = require('../fcm');
 var _async = require('async');
+var request = require('request');
 
 var Store = require('../models/Store');
 var Super = require('../models/Super');
@@ -60,6 +61,42 @@ module.exports.newStore = function newStore(obj, cb) {
   });
 };
 
+module.exports.postEvent = function postEvent(newEventype, storeId, cb) {
+  request({
+    url: config.caesar.address + "/events",
+    method: 'POST',
+    json: true,
+    body: {
+      eventype: newEventype,
+      storeId: storeId
+    }
+  }, function(err, res, body) {
+    if (err || res.statusCode != 200) {
+      console.log(err);
+      return;
+    }
+  });
+}
+
+module.exports.getAverageTime = function getAverageTime(storeId, cb) {
+
+  request({
+    url: config.caesar.address + "/averageTime/" + storeId,
+    method: 'GET',
+    json: true
+  }, function(err, res, body) {
+    
+    fcm.FCMNotificationBuilder()
+      .setTopic('store.' + storeId)
+      .addData('aproxTime', body) // arriba null
+      .send(function(err, res) {
+       if (err)
+         console.log('FCM error:', err);
+      });
+      cb(err,body);
+  });
+}
+
 module.exports.getStoreList = function getStoreList(cb) {
   Store.find(function(err, stores) {
     if (err)
@@ -83,7 +120,8 @@ module.exports.updateStore = function updateStore(id, obj, cb) {
     if (err)
       return cb(err);
 
-    foundStore.name = obj.name;
+    if (obj.name)
+      foundStore.name = obj.name;
 
     foundStore.save(function(err) {
       if (err)
