@@ -29,15 +29,15 @@ module.exports = function(router, mqttClient) {
       publishUpdate(id);
 
     if (chan === 'advance') {
-      advanceStoreTurn(match[1], function(err, result) {
+      advanceStoreTurn(id, function(err, result) {
         if (err)
           return;
 
-        mqttClient.publish('etorn/store/' + match[1] + '/storeTurn', '' + result);
+        mqttClient.publish('etorn/store/' + id + '/storeTurn', '' + result);
 
-        getStoreQueue(match[1], function(err, queue) {
+        getStoreQueue(id, function(err, queue) {
           if (!err)
-            mqttClient.publish('etorn/store/' + match[1] + '/queue', '' + queue);
+            mqttClient.publish('etorn/store/' + id + '/queue', '' + queue);
         });
       });
     }
@@ -133,6 +133,9 @@ module.exports = function(router, mqttClient) {
       removeUserFromStoreQueue(req.params.user_id, req.params.store_id, function(err, response) {
         if (err)
           return res.json({message: err});
+
+          //Avisem a les apps que el usuari s'ha eliminat de la botiga, per tant pot tornar a demanar torn.
+          mqttClient.publish('etorn/user/' + req.params.user_id + '/removed');
 
         res.json({message: 'Successfully deleted'});
       });

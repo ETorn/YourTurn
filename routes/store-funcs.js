@@ -125,14 +125,14 @@ module.exports.addUserToStoreQueue = function addUserToStoreQueue(uid, sid, cb) 
         if (foundStore.usersTurn > config.stores.maxTurn)
           foundStore.usersTurn = 1;
 
-        fcm.FCMNotificationBuilder()
+        /*fcm.FCMNotificationBuilder()
           .setTopic('store.' + foundStore._id)
           .addData('usersTurn', foundStore.usersTurn)
           .addData('storeQueue',foundStore.users.length)
           .send(function(err, res) {
            if (err)
              console.log('FCM error:', err);
-          });
+          });*/
 
 
         var turn = new Turn();
@@ -234,13 +234,13 @@ module.exports.advanceStoreTurn = function advanceStoreTurn(id, cb) {
       if (err)
         return cb(err);
 
-      fcm.FCMNotificationBuilder()
+     /*fcm.FCMNotificationBuilder()
         .setTopic('store.' + foundStore._id)
         .addData('storeTurn', foundStore.storeTurn)
         .send(function(err, res) {
          if (err)
            console.log('FCM error:', err);
-        });
+        });*/
 
       cb(null, foundStore.storeTurn);
     });
