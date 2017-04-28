@@ -32,7 +32,7 @@ module.exports = function(router) {
         res.json(users);
       })
     });
-    
+
   router.route('/users/:user_id')
     // get the user with that id (accessed at GET http://localhost:8080/users/:user_id)
     .get(function(req, res) {
@@ -48,7 +48,11 @@ module.exports = function(router) {
       User.findById(req.params.user_id, function(err, user) {
         if (err)
           return res.send(err);
-        user.turn = req.body.turn;  // update the user info
+
+        // update the user info
+        if (req.body.notificationTurns)
+          user.notificationTurns = req.body.notificationTurns;
+
         // save the user
         user.save(function(err) {
           if (err)
