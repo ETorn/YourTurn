@@ -28,10 +28,18 @@ mongoose.connect('mongodb://' + config.mongodb.address + '/yourturn');
 l('Connected.')
 
 var server = new mosca.Server({
+  persistence: {
+    factory: mosca.persistence.Mongo,
+    url: 'mongodb://' + config.mongodb.address + '/mqtt',
+    ttl: {
+      subscriptions: 1000 * 60 * 10,
+      packets: 1000 * 60 * 10
+    }
+  },
   http: {
-     port: 1884,
-     bundle: true,
-     static: './'
+   port: 1884,
+   bundle: true,
+   static: './'
   }
 });
 
