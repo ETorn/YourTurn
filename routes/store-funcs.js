@@ -94,27 +94,32 @@ var turnRequest = function(turn, storeTurn) {
       var queue = turn.turn - storeTurn;
       console.log("queue", queue);
       console.log("notificationTurns", user.notificationTurns);
+
+      var data = {
+        queue: queue,
+        userId: null
+      };
+
       if (queue == user.notificationTurns) {
-        resolve(turn.userId);
+        //resolve(user._id);
+        data.userId = user._id;
+        resolve(data);
       }
-      resolve(null);
+      resolve(data);
     });
   })
-
 }
 module.exports.notifyUser = function notifyUser(turns, storeTurn, cb) {
   var promises = turns.map(function(turn) {
     var promise = turnRequest(turn, storeTurn);
     return promise;
-    });
+  });
 
-    Promise.all(promises).then(function(data) {
-      console.log("DATA", data);
-      console.log("usersIDtoNotify FUNC", promises);
-      cb(null,data);
-    });
-
-  }
+  Promise.all(promises).then(function(data) {
+    console.log("DATA", data);
+    cb(null,data);
+  });
+}
 
 module.exports.getStoreTurns = function getStoreTurns(storeId, cb) {
 

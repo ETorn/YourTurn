@@ -1,4 +1,5 @@
 var funcs = require('./store-funcs.js');
+var fcm = require('../fcm');
 
 var newStore = funcs.newStore;
 var getStoreList = funcs.getStoreList;
@@ -217,17 +218,34 @@ module.exports = function(router, mqttClient) {
             return u.userId;
           });
 
-          //Per cada torn demanat en aquesta parada, avisem a la app que ha de restar -1 a la cua del usuari
-          for (i = 0; i < turns.length; i++) {
-            mqttClient.publish('etorn/store/' + req.params.store_id + '/user/' + userIds[i] + '/queue');
-          }
+
 
           //Avisem a cada usuari que estigui a tants turns de distacia com ha decidit ell a preferencies
           notifyUser(turns, result,  function(err, res) {
-            console.log("usersIDtoNotify RES", res);
+            //Per cada torn demanat en aquesta parada, avisem a la app que ha de restar -1 a la cua del usuari
+            for (i = 0; i < turns.length; i++) {
+              //mqttClient.publish('etorn/store/' + req.params.store_id + '/user/' + userIds[i] + '/queue');
+              fcm.FCMNotificationBuilder()
+                .setTopic('store.' + req.params.store_id + '.user.' + userIds[i])
+                .addData('storeTurn', 'advance')
+                .addData('queue', res[i].queue)
+                .send(function(err, res) {
+                 if (err)
+                   console.log('FCM error:', err);
+                });
+            }
               for (i = 0; i < res.length; i++) {
-                if (res[i] != undefined && res[i] != null)
-                  mqttClient.publish('etorn/store/' + req.params.store_id + '/user/' + res[i] + '/notification');
+                if (res[i].userId != undefined && res[i].userId != null) {
+                  //mqttClient.publish('etorn/store/' + req.params.store_id + '/user/' + res[i] + '/notification');
+                  console.log("res", res[i]);
+                  fcm.FCMNotificationBuilder()
+                    .setTopic('store.' + req.params.store_id + '.user.' + res[i].userId)
+                    .addData('notification', res[i].queue) //App decideix quin missatge enviar com a notificacio
+                    .send(function(err, res) {
+                     if (err)
+                       console.log('FCM error:', err);
+                    });
+                }
               }
           });
         });
