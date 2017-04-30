@@ -75,6 +75,19 @@ module.exports = function(router) {
       });
     });
 
+  router.route('/turns/store/:store_id')
+    .get(function(req, res) {
+      l('GET /turn/%s', req.params.store_id);
+      Turn.find({storeId: req.params.store_id}, function(err, turns) {
+        if (err) {
+          l('Turn not found on store (%s): %s', req.params.store_id, err);
+          return res.send(err);
+        }
+
+        res.json(turns);
+      });
+    });
+
   router.route('/turn/:turn_id')
     .get(function(req, res) {
       l('GET /turn/%s', req.params.turn_id);

@@ -12,7 +12,8 @@ var getStoreQueue = funcs.getStoreQueue;
 var advanceStoreTurn = funcs.advanceStoreTurn;
 var postEvent = funcs.postEvent;
 var getAverageTime = funcs.getAverageTime;
-
+var getStoreTurns = funcs.getStoreTurns;
+var notifyUser = funcs.notifyUser;
 
 module.exports = function(router, mqttClient) {
 
@@ -31,15 +32,35 @@ module.exports = function(router, mqttClient) {
       publishUpdate(id);
 
     if (chan === 'advance') {
-      advanceStoreTurn(match[1], function(err, result) {
+      advanceStoreTurn(id, function(err, result) {
         if (err)
           return;
 
-        mqttClient.publish('etorn/store/' + match[1] + '/storeTurn', '' + result);
+        mqttClient.publish('etorn/store/' + id + '/storeTurn', '' + storeTurn);
 
-        getStoreQueue(match[1], function(err, queue) {
+        //Per cada torn demanat en aquesta parada, avisem a la app que ha de restar -1 a la cua del usuari
+        getStoreTurns(id, function(err, turns) {
+          var userIds = result.map(function(u) {
+            return u.userId;
+          });
+
+          console.log('userIds: ',userIds);
+
+          for (i = 0; i < turns.length; i++) {
+            mqttClient.publish('etorn/store/' + id + '/user/' + userIds[i] + '/queue');
+          }
+
+          notifyUser(turns, storeTurn,  function(err, res) {
+            for (i = 0; i < res.length; i++) {
+              mqttClient.publish('etorn/store/' + id + '/user/' + res[i] + '/notification');
+            }
+          });
+        });
+
+
+        getStoreQueue(id, function(err, queue) {
           if (!err)
-            mqttClient.publish('etorn/store/' + match[1] + '/queue', '' + queue);
+            mqttClient.publish('etorn/store/' + id + '/queue', '' + queue);
         });
       });
     }
@@ -134,10 +155,11 @@ module.exports = function(router, mqttClient) {
           mqttClient.publish('etorn/store/' + req.params.store_id + '/aproxTime', '' + time);
         });
 
+        /* Comentat ja que al demanar torn, si retornem la cua de la store, sera +1 a la actual
         getStoreQueue(req.params.store_id, function(err, queue) {
           if (!err)
             mqttClient.publish('etorn/store/' + req.params.store_id + '/queue', '' + queue);
-        });
+        });*/
 
         res.json({message: 'User added to store queue!', turn: result});
       });
@@ -189,6 +211,26 @@ module.exports = function(router, mqttClient) {
             mqttClient.publish('etorn/store/' + req.params.store_id + '/queue', '' + queue);
         });
 
+        getStoreTurns(req.params.store_id, function(err, turns) {
+          console.log("turns", turns)
+          var userIds = turns.map(function(u) {
+            return u.userId;
+          });
+
+          //Per cada torn demanat en aquesta parada, avisem a la app que ha de restar -1 a la cua del usuari
+          for (i = 0; i < turns.length; i++) {
+            mqttClient.publish('etorn/store/' + req.params.store_id + '/user/' + userIds[i] + '/queue');
+          }
+
+          //Avisem a cada usuari que estigui a tants turns de distacia com ha decidit ell a preferencies
+          notifyUser(turns, result,  function(err, res) {
+            console.log("usersIDtoNotify RES", res);
+              for (i = 0; i < res.length; i++) {
+                if (res[i] != undefined && res[i] != null)
+                  mqttClient.publish('etorn/store/' + req.params.store_id + '/user/' + res[i] + '/notification');
+              }
+          });
+        });
         res.json({message: 'StoreTurn updated', storeTurn: result});
       });
 

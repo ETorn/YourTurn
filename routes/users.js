@@ -6,7 +6,12 @@ module.exports = function(router) {
     // create a user (accessed at POST http://localhost:8080/users)
     .post(function(req, res) {
       var user = new User();      // create a new instance of the User model
-      user.firebaseId = req.body.firebaseId;
+
+      if (req.body.firebaseId)
+        user.firebaseId = req.body.firebaseId;
+      if (req.body.notificationTurns)
+        user.notificationTurns = req.body.notificationTurns;
+
       User.findOne({firebaseId: req.body.firebaseId}, function (err, userFound) {
         if (userFound) {
           return res.json({message: 'This user already exists', userId: userFound.id});

@@ -78,6 +78,61 @@ module.exports.postEvent = function postEvent(newEventype, storeId, cb) {
   });
 }
 
+var turnRequest = function(turn, storeTurn) {
+  return new Promise(function(resolve, reject) {
+    request({
+      url: config.node.address + "/users/" + turn.userId,
+      method: 'GET',
+      json: true
+    }, function(err, res, user) {
+
+      if (err) {
+        console.log(err);
+        return;
+      }
+      //Si la resta entre el torn actual de la parada i el torn demanat per l'usuari = les seves preferencies, retornem
+      var queue = turn.turn - storeTurn;
+      console.log("queue", queue);
+      console.log("notificationTurns", user.notificationTurns);
+      if (queue == user.notificationTurns) {
+        resolve(turn.userId);
+      }
+      resolve(null);
+    });
+  })
+
+}
+module.exports.notifyUser = function notifyUser(turns, storeTurn, cb) {
+  var promises = turns.map(function(turn) {
+    var promise = turnRequest(turn, storeTurn);
+    return promise;
+    });
+
+    Promise.all(promises).then(function(data) {
+      console.log("DATA", data);
+      console.log("usersIDtoNotify FUNC", promises);
+      cb(null,data);
+    });
+
+  }
+
+module.exports.getStoreTurns = function getStoreTurns(storeId, cb) {
+
+  request({
+    url: config.node.address + "/turns/store/" + storeId,
+    method: 'GET',
+    json: true
+  }, function(err, res, body) {
+
+    if (err) {
+      console.log(err);
+      return;
+    }
+    cb(err,body);
+  });
+
+}
+
 module.exports.getAverageTime = function getAverageTime(storeId, cb) {
 
   request({
@@ -85,7 +140,7 @@ module.exports.getAverageTime = function getAverageTime(storeId, cb) {
     method: 'GET',
     json: true
   }, function(err, res, body) {
-    
+
     fcm.FCMNotificationBuilder()
       .setTopic('store.' + storeId)
       .addData('aproxTime', body) // arriba null
@@ -250,7 +305,7 @@ module.exports.advanceStoreTurn = function advanceStoreTurn(id, cb) {
       function(cb) {
         Store.update(
           {_id: id},
-          {$pull: {users: foundStore.users[0]}},
+          {$pull: {users: foundStore.users[0]}}, //Treiem l'ultim usuari de la cua de la botiga
           {multi: true},
           function(err, user) {
             if (err)
