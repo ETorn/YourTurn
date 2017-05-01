@@ -144,12 +144,14 @@ module.exports = function(router) {
   router.route('/supers/:super_id')
     .get(function(req, res) {
       l('Request for super (%s)', req.params.super_id);
-      Super.findById(req.params.super_id, function(err, superM) {
+      Super.findById(req.params.super_id)
+      .populate('stores')
+      .exec(function(err, superM) {
         if (err) {
           l('Query failed: %s', err);
           return res.send(err);
         }
-
+        
         res.json(addDistance(superM, req));
       });
     })
