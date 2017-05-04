@@ -78,8 +78,8 @@ module.exports.postEvent = function postEvent(newEventype, storeId, cb) {
   });
 }
 
-var turnRequest = function(turn, storeTurn) {
-  return new Promise(function(resolve, reject) {
+module.exports.turnRequest = function turnRequest(turn, storeTurn, cb) {
+  //return new Promise(function(resolve, reject) {
     request({
       url: config.node.address + "/users/" + turn.userId,
       method: 'GET',
@@ -101,9 +101,10 @@ var turnRequest = function(turn, storeTurn) {
       };
 
       data.notify = queue == user.notificationTurns;
-      
-      resolve(data);
-    });
+
+      //resolve(data);
+      return cb(null, data);
+  //  });
   })
 }
 module.exports.notifyUser = function notifyUser(turns, storeTurn, storeId, cb) {
@@ -116,7 +117,7 @@ module.exports.notifyUser = function notifyUser(turns, storeTurn, storeId, cb) {
     console.log("DATA", data);
 
     data.forEach(function(el){
-      
+
       //Per cada torn demanat en aquesta parada, avisem a la app que ha de restar -1 a la cua del usuari
       for (i = 0; i < turns.length; i++) {
         //mqttClient.publish('etorn/store/' + req.params.store_id + '/user/' + userIds[i] + '/queue');

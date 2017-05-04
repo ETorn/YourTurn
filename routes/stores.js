@@ -16,6 +16,7 @@ var postEvent = funcs.postEvent;
 var getAverageTime = funcs.getAverageTime;
 var getStoreTurns = funcs.getStoreTurns;
 var notifyUser = funcs.notifyUser;
+var turnRequest = funcs.turnRequest;
 
 module.exports = function(router, mqttClient) {
 
@@ -229,8 +230,8 @@ module.exports = function(router, mqttClient) {
 
           //Augmentar torns amb user info
           //Calcular cua usuari individual
-          _async.map(userIds, function(el, cb) {
-            funcs.augmentUser(el, function(err, data) {
+          _async.map(turns, function(el, cb) {
+            funcs.turnRequest(el, result, function(err, data) {
               cb(err, data);
             });
           }, function(err, arr) {
@@ -252,34 +253,35 @@ module.exports = function(router, mqttClient) {
 
             //enviar notis
             _async.each(toSend, function(el, cb){
+
               //Per cada torn demanat en aquesta parada, avisem a la app que ha de restar -1 a la cua del usuari
-              for (i = 0; i < turns.length; i++) {
+            //  for (i = 0; i < turns.length; i++) {
                 //mqttClient.publish('etorn/store/' + req.params.store_id + '/user/' + userIds[i] + '/queue');
                 fcm.FCMNotificationBuilder()
-                .setTopic('store.' + storeId + '.user.' + el.userId)
+                .setTopic('store.' + req.params.store_id + '.user.' + el.user._id)
                 .addData('notification', el.queue) //App decideix quin missatge enviar com a notificacio
                 .send(function(err, res) {
                   if (err)
                     console.log('FCM error:', err);
-                  
+
                   cb(null);
                 });
-              }
+            //  }
             },
-            
+
             function(err) {
               res.json({message: 'StoreTurn updated', storeTurn: result});
             });
 
           });
-          
-          
+
+
          /* //Avisem a cada usuari que estigui a tants turns de distacia com ha decidit ell a preferencies
           notifyUser(turns, result, req.params.store_id, function(err, res) {
             //empty
           });*/
         });
-        
+
       });
 
     });
