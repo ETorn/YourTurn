@@ -1,5 +1,6 @@
 var funcs = require('./store-funcs.js');
 var fcm = require('../fcm');
+var _async = require('async');
 
 var newStore = funcs.newStore;
 var getStoreList = funcs.getStoreList;
@@ -31,6 +32,12 @@ module.exports = function(router, mqttClient) {
 
     if (chan === 'idk')
       publishUpdate(id);
+
+    if (chan === 'aproxTime') {
+      //Cada vegada que caesar envia el temps aproximat, actualitzem la store
+      console.log("CaesarMessage: ", message);
+      updateStore(id, {aproxTime: message}, function(){});
+    }
 
     if (chan === 'advance') {
       advanceStoreTurn(id, function(err, result) {
@@ -114,7 +121,7 @@ module.exports = function(router, mqttClient) {
     })
     .put(function(req, res) {
 
-      updateStore(req.params.store_id, {name: req.body.name}, function(err, result) {
+      updateStore(req.params.store_id, {name: req.body.name, aproxTime: req.body.aproxTime}, function(err, result) {
         if (err)
           return res.json({message: err});
 
@@ -218,38 +225,61 @@ module.exports = function(router, mqttClient) {
             return u.userId;
           });
 
+          //Torns d'una store que ha avançat
 
-
-          //Avisem a cada usuari que estigui a tants turns de distacia com ha decidit ell a preferencies
-          notifyUser(turns, result,  function(err, res) {
-            //Per cada torn demanat en aquesta parada, avisem a la app que ha de restar -1 a la cua del usuari
-            for (i = 0; i < turns.length; i++) {
+          //Augmentar torns amb user info
+          //Calcular cua usuari individual
+          _async.map(userIds, function(el, cb) {
+            funcs.augmentUser(el, function(err, data) {
+              cb(err, data);
+            });
+          }, function(err, arr) {
+            //enviar notis cua
+            for (i = 0; i < arr.length; i++) {
               //mqttClient.publish('etorn/store/' + req.params.store_id + '/user/' + userIds[i] + '/queue');
               fcm.FCMNotificationBuilder()
-                .setTopic('store.' + req.params.store_id + '.user.' + userIds[i])
+                .setTopic('store.' + req.params.store_id + '.user.' + arr[i].user._id)
                 .addData('storeTurn', 'advance')
-                .addData('queue', res[i].queue)
+                .addData('queue', arr[i].queue)
                 .send(function(err, res) {
                  if (err)
                    console.log('FCM error:', err);
                 });
             }
-              for (i = 0; i < res.length; i++) {
-                if (res[i].userId != undefined && res[i].userId != null) {
-                  //mqttClient.publish('etorn/store/' + req.params.store_id + '/user/' + res[i] + '/notification');
-                  console.log("res", res[i]);
-                  fcm.FCMNotificationBuilder()
-                    .setTopic('store.' + req.params.store_id + '.user.' + res[i].userId)
-                    .addData('notification', res[i].queue) //App decideix quin missatge enviar com a notificacio
-                    .send(function(err, res) {
-                     if (err)
-                       console.log('FCM error:', err);
-                    });
-                }
+
+            //filtrar, decidir si cal notificacio per user
+            var toSend = arr.filter(function(el) {return el.notify;});
+
+            //enviar notis
+            _async.each(toSend, function(el, cb){
+              //Per cada torn demanat en aquesta parada, avisem a la app que ha de restar -1 a la cua del usuari
+              for (i = 0; i < turns.length; i++) {
+                //mqttClient.publish('etorn/store/' + req.params.store_id + '/user/' + userIds[i] + '/queue');
+                fcm.FCMNotificationBuilder()
+                .setTopic('store.' + storeId + '.user.' + el.userId)
+                .addData('notification', el.queue) //App decideix quin missatge enviar com a notificacio
+                .send(function(err, res) {
+                  if (err)
+                    console.log('FCM error:', err);
+                  
+                  cb(null);
+                });
               }
+            },
+            
+            function(err) {
+              res.json({message: 'StoreTurn updated', storeTurn: result});
+            });
+
           });
+          
+          
+         /* //Avisem a cada usuari que estigui a tants turns de distacia com ha decidit ell a preferencies
+          notifyUser(turns, result, req.params.store_id, function(err, res) {
+            //empty
+          });*/
         });
-        res.json({message: 'StoreTurn updated', storeTurn: result});
+        
       });
 
     });

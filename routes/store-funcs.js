@@ -96,20 +96,17 @@ var turnRequest = function(turn, storeTurn) {
       console.log("notificationTurns", user.notificationTurns);
 
       var data = {
-        queue: queue,
-        userId: null
+        user: user,
+        queue: queue
       };
 
-      if (queue == user.notificationTurns) {
-        //resolve(user._id);
-        data.userId = user._id;
-        resolve(data);
-      }
+      data.notify = queue == user.notificationTurns;
+      
       resolve(data);
     });
   })
 }
-module.exports.notifyUser = function notifyUser(turns, storeTurn, cb) {
+module.exports.notifyUser = function notifyUser(turns, storeTurn, storeId, cb) {
   var promises = turns.map(function(turn) {
     var promise = turnRequest(turn, storeTurn);
     return promise;
@@ -117,6 +114,35 @@ module.exports.notifyUser = function notifyUser(turns, storeTurn, cb) {
 
   Promise.all(promises).then(function(data) {
     console.log("DATA", data);
+
+    data.forEach(function(el){
+      
+      //Per cada torn demanat en aquesta parada, avisem a la app que ha de restar -1 a la cua del usuari
+      for (i = 0; i < turns.length; i++) {
+        //mqttClient.publish('etorn/store/' + req.params.store_id + '/user/' + userIds[i] + '/queue');
+        fcm.FCMNotificationBuilder()
+          .setTopic('store.' + req.params.store_id + '.user.' + userIds[i])
+          .addData('storeTurn', 'advance')
+          .addData('queue', turns[i].queue)
+          .send(function(err, res) {
+            if (err)
+              console.log('FCM error:', err);
+          });
+      }
+
+      if (el.userId) {
+        //mqttClient.publish('etorn/store/' + storeId + '/user/' + el + '/notification');
+        console.log("res", el);
+        fcm.FCMNotificationBuilder()
+          .setTopic('store.' + storeId + '.user.' + el.userId)
+          .addData('notification', el.queue) //App decideix quin missatge enviar com a notificacio
+          .send(function(err, res) {
+            if (err)
+              console.log('FCM error:', err);
+          });
+      }
+    });
+
     cb(null,data);
   });
 }
@@ -183,6 +209,8 @@ module.exports.updateStore = function updateStore(id, obj, cb) {
     if (obj.name)
       foundStore.name = obj.name;
 
+    if (obj.aproxTime)
+      foundStore.aproxTime = obj.aproxTime;
     foundStore.save(function(err) {
       if (err)
         return cb(err);
@@ -305,7 +333,7 @@ module.exports.advanceStoreTurn = function advanceStoreTurn(id, cb) {
     if (foundStore.storeTurn > config.stores.maxTurn)
       foundStore.storeTurn = 1;
 
-    _async.parallel([
+    _async.series([
 
       function(cb) {
         Store.update(

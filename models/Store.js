@@ -6,7 +6,7 @@ var StoreSchema   = new Schema({
     users: [{type: Schema.ObjectId, ref: "User"}],
     storeTurn: Number,
     usersTurn: Number,
-    //idqr: String
+    aproxTime: Number
 });
 
 module.exports = mongoose.model('Store', StoreSchema);
