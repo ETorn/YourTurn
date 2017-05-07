@@ -237,11 +237,13 @@ module.exports = function(router, mqttClient) {
           }, function(err, arr) {
             //enviar notis cua
             for (i = 0; i < arr.length; i++) {
+              console.log("aproxTime: ", arr[i].aproxTime);
               //mqttClient.publish('etorn/store/' + req.params.store_id + '/user/' + userIds[i] + '/queue');
               fcm.FCMNotificationBuilder()
                 .setTopic('store.' + req.params.store_id + '.user.' + arr[i].user._id)
                 .addData('storeTurn', 'advance')
                 .addData('queue', arr[i].queue)
+                .addData('aproxTime', arr[i].aproxTime)
                 .send(function(err, res) {
                  if (err)
                    console.log('FCM error:', err);
@@ -260,6 +262,7 @@ module.exports = function(router, mqttClient) {
                 fcm.FCMNotificationBuilder()
                 .setTopic('store.' + req.params.store_id + '.user.' + el.user._id)
                 .addData('notification', el.queue) //App decideix quin missatge enviar com a notificacio
+                .addData('aproxTime', el.aproxTime)
                 .send(function(err, res) {
                   if (err)
                     console.log('FCM error:', err);

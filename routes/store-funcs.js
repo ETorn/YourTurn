@@ -102,8 +102,13 @@ module.exports.turnRequest = function turnRequest(turn, storeTurn, cb) {
 
       data.notify = queue == user.notificationTurns;
 
+      getAverageTime(turn.storeId, function (err, time) {
+        if (err)
+          return cb(err);
+        data.aproxTime = time * turn.turn; // temps aproximat del usuari
+        return cb(null, data);
+      });
       //resolve(data);
-      return cb(null, data);
   //  });
   })
 }
@@ -165,7 +170,7 @@ module.exports.getStoreTurns = function getStoreTurns(storeId, cb) {
 
 }
 
-module.exports.getAverageTime = function getAverageTime(storeId, cb) {
+var getAverageTime = module.exports.getAverageTime = function getAverageTime(storeId, cb) {
 
   request({
     url: config.caesar.address + "/averageTime/" + storeId,
@@ -173,6 +178,7 @@ module.exports.getAverageTime = function getAverageTime(storeId, cb) {
     json: true
   }, function(err, res, body) {
 
+//Per a que notificarho aqui ?¿
     fcm.FCMNotificationBuilder()
       .setTopic('store.' + storeId)
       .addData('aproxTime', body) // arriba null
