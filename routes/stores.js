@@ -213,6 +213,14 @@ module.exports = function(router, mqttClient) {
         if (err)
           res.json({message: err});
 
+        getStoreById(req.params.store_id, function(err, foundStore) {
+          var lastUserId = foundStore.users[foundStore.users.length - 1];
+          removeUserFromStoreQueue(lastUserId, req.params.store_id, function(err, message){
+            console.log(message);
+          });
+        })
+
+
         mqttClient.publish('etorn/store/' + req.params.store_id + '/storeTurn', '' + result);
 
         getStoreQueue(req.params.store_id, function(err, queue) {
