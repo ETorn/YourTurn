@@ -214,12 +214,12 @@ module.exports = function(router, mqttClient) {
         if (err)
           res.json({message: err});
 
-        getStoreById(req.params.store_id, function(err, foundStore) {
+        /*getStoreById(req.params.store_id, function(err, foundStore) {
           var lastUserId = foundStore.users[foundStore.users.length - 1];
           removeUserFromStoreQueue(lastUserId, req.params.store_id, function(err, message){
             console.log(message);
           });
-        })
+        })*/
 
 
         mqttClient.publish('etorn/store/' + req.params.store_id + '/storeTurn', '' + result);
@@ -245,15 +245,14 @@ module.exports = function(router, mqttClient) {
             });
           }, function(err, arr) {
             //update de queue i temps dels torns
-            
+
             _async.each(arr, function (turn, cb){
-              console.log("turnIDDDDD: ", turn);
-              updateTurn(turn.user._id, turn, function(){
+              updateTurn(turn.turnId, turn, function(){
                 cb(null);
               })
             });
-            
-            
+
+
             //enviar notis cua
             for (i = 0; i < arr.length; i++) {
               console.log("aproxTime: ", arr[i].aproxTime);

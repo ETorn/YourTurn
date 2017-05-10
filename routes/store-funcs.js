@@ -20,11 +20,11 @@ module.exports.updateTurn = function updateTurn(turnId, obj, cb) {
     if (err)
       return cb(err);
 
-    if (obj.user.queue)
-      foundTurn.queue = obj.user.queue;
+    if (obj.queue)
+      foundTurn.queue = obj.queue;
 
-    if (obj.user.aproxTime)
-      foundTurn.aproxTime = obj.user.aproxTime;
+    if (obj.aproxTime)
+      foundTurn.aproxTime = obj.aproxTime;
 
     foundTurn.save(function(err) {
       if (err)
@@ -121,7 +121,7 @@ var turnRequest = module.exports.turnRequest = function turnRequest(turn, storeT
       console.log("turnIDEEEEEE: ", turn)
 
       var data = {
-        turnId: turn.id,
+        turnId: turn._id,
         user: user,
         queue: queue
       };
@@ -133,7 +133,10 @@ var turnRequest = module.exports.turnRequest = function turnRequest(turn, storeT
       getAverageTime(turn.storeId, function (err, time) {
         if (err)
           return cb(err);
-        data.aproxTime = time * turn.turn; // temps aproximat del usuari
+          if (turn.queue) {
+            data.aproxTime = parseFloat((time).toFixed(1)) * turn.queue; // temps aproximat del usuari
+            console.log("Returning aproxTime: ", data.aproxTime);
+          }
         return cb(null, data);
       });
       //resolve(data);
