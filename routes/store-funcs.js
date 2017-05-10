@@ -14,6 +14,27 @@ var computeQueue = function(store) {
   return store;
 }
 
+module.exports.updateTurn = function updateTurn(turnId, obj, cb) {
+  console.log("turnId: ", turnId);
+  Turn.findById(turnId, function(err, foundTurn) {
+    if (err)
+      return cb(err);
+
+    if (obj.user.queue)
+      foundTurn.queue = obj.user.queue;
+
+    if (obj.user.aproxTime)
+      foundTurn.aproxTime = obj.user.aproxTime;
+
+    foundTurn.save(function(err) {
+      if (err)
+        return cb(err);
+
+      cb(null);
+    });
+  });
+}
+
 module.exports.newStore = function newStore(obj, cb) {
   var store = new Store();
 
@@ -78,7 +99,7 @@ module.exports.postEvent = function postEvent(newEventype, storeId, cb) {
   });
 }
 
-module.exports.turnRequest = function turnRequest(turn, storeTurn, cb) {
+var turnRequest = module.exports.turnRequest = function turnRequest(turn, storeTurn, cb) {
   //return new Promise(function(resolve, reject) {
     request({
       url: config.node.address + "/users/" + turn.userId,
@@ -88,19 +109,26 @@ module.exports.turnRequest = function turnRequest(turn, storeTurn, cb) {
 
       if (err) {
         console.log(err);
-        return;
+        return cb(err);
       }
+
+      if (!user)
+        return cb(null);
+
       //Si la resta entre el torn actual de la parada i el torn demanat per l'usuari = les seves preferencies, retornem
-      var queue = turn.turn - storeTurn;
+      var queue = turn.turn - storeTurn; // Aixo nomes funciona amb els torns de manera sequencial
       console.log("queue", queue);
-      console.log("notificationTurns", user.notificationTurns);
+      console.log("turnIDEEEEEE: ", turn)
 
       var data = {
+        turnId: turn.id,
         user: user,
         queue: queue
       };
 
+      console.log("notificationTurns", user.notificationTurns);
       data.notify = queue == user.notificationTurns;
+
 
       getAverageTime(turn.storeId, function (err, time) {
         if (err)
@@ -199,7 +227,7 @@ module.exports.getStoreList = function getStoreList(cb) {
   });
 };
 
-module.exports.getStoreById = function getStoreById(id, cb) {
+var getStoreById = module.exports.getStoreById = function getStoreById(id, cb) {
   Store.findById(id, function(err, foundStore) {
     if (err)
       return cb(err);
@@ -248,51 +276,59 @@ module.exports.addUserToStoreQueue = function addUserToStoreQueue(uid, sid, cb) 
       {_id: sid},
       {$push: {users: uid}},
       {safe: true, upsert: true, new: true},
-      function (err, foundStore){
+      function (err, storeToUpdate){
         if (err)
           return cb(err);
 
-        var userTurn = foundStore.usersTurn;
-        foundStore.usersTurn++;
+        var userTurn = storeToUpdate.usersTurn;
+        storeToUpdate.usersTurn++;
 
-        if (foundStore.usersTurn > config.stores.maxTurn)
-          foundStore.usersTurn = 1;
+        if (storeToUpdate.usersTurn > config.stores.maxTurn)
+          storeToUpdate.usersTurn = 1;
 
         fcm.FCMNotificationBuilder()
-          .setTopic('store.' + foundStore._id)
-          .addData('usersTurn', foundStore.usersTurn)
-          .addData('storeQueue',foundStore.users.length)
+          .setTopic('store.' + storeToUpdate._id)
+          .addData('usersTurn', storeToUpdate.usersTurn)
+          .addData('storeQueue',storeToUpdate.users.length)
           .send(function(err, res) {
            if (err)
              console.log('FCM error:', err);
           });
 
 
-        var turn = new Turn();
-        turn.storeId = foundStore._id;
-        turn.turn = userTurn;
-        turn.userId = uid;
+          // update time i queue
+          var turn = new Turn();
+          turn.storeId = storeToUpdate._id;
+          turn.turn = userTurn;
+          turn.userId = uid;
 
-        turn.save(function(err, newTurn) {
-          if (err)
-            return cb(err);
+          turnRequest(turn, storeToUpdate.storeTurn, function(err, data) {
+            if (data) {
+              turn.aproxTime = data.aproxTime;
+              turn.queue = data.queue;
+            }
 
-            User.findByIdAndUpdate(
-              {_id: uid},
-              {$push: {turns: newTurn._id}},
-              {safe: true, upsert: true, new: true},
-              function (err, foundUser) {
-                if (err)
-                  return cb(err);
-              }
-            )
-        });
+            turn.save(function(err, newTurn) {
+              if (err)
+                return cb(err);
 
-        foundStore.save(function(err) {
-          if (err)
-            return cb(err);
+                User.findByIdAndUpdate(
+                  {_id: uid},
+                  {$push: {turns: newTurn._id}},
+                  {safe: true, upsert: true, new: true},
+                  function (err, foundUser) {
+                    if (err)
+                      return cb(err);
+                  }
+                )
+            });
 
-          cb(null, userTurn);
+          storeToUpdate.save(function(err) {
+            if (err)
+              return cb(err);
+
+            cb(null, userTurn);
+          });
         });
       }
     );

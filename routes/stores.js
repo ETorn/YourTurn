@@ -17,6 +17,7 @@ var getAverageTime = funcs.getAverageTime;
 var getStoreTurns = funcs.getStoreTurns;
 var notifyUser = funcs.notifyUser;
 var turnRequest = funcs.turnRequest;
+var updateTurn = funcs.updateTurn;
 
 module.exports = function(router, mqttClient) {
 
@@ -243,6 +244,16 @@ module.exports = function(router, mqttClient) {
               cb(err, data);
             });
           }, function(err, arr) {
+            //update de queue i temps dels torns
+            
+            _async.each(arr, function (turn, cb){
+              console.log("turnIDDDDD: ", turn);
+              updateTurn(turn.user._id, turn, function(){
+                cb(null);
+              })
+            });
+            
+            
             //enviar notis cua
             for (i = 0; i < arr.length; i++) {
               console.log("aproxTime: ", arr[i].aproxTime);

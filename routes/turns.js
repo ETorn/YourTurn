@@ -1,4 +1,9 @@
 var l = require('debug')('etorn:routes:turns');
+var funcs = require('./store-funcs.js');
+var getAverageTime = funcs.getAverageTime;
+var turnRequest = funcs.turnRequest;
+var getStoreById = funcs.getStoreById;
+
 module.exports = function(router) {
   var Turn = require('../models/Turn');
   var User = require('../models/User');
@@ -13,7 +18,7 @@ module.exports = function(router) {
       if (req.body.turn)
         turn.turn = req.body.turn;
       else
-        return res.json({message: 'No store_id specified'})
+        return res.json({message: 'No turn specified'})
 
       if (req.body.userId) {
         userId = req.body.userId;
@@ -45,20 +50,33 @@ module.exports = function(router) {
               if (turnFound)
                 return res.json({message: 'This turn already exists'});
             }
-            // save the turn and check for errors
-            turn.save(function(err, newTurn) {
-              if (err) {
-                l('Turn save failed: %s', err);
-                return res.json({message: err});
-              }
 
-              var user = new User();
-              User.update({_id: userId}, {$push: {turns: turn._id}}, function (err, raw){
-                if (err)
-                  return res.json({message: err});
+            getStoreById(turn.storeId, function(err, foundStore) {
+              turnRequest(turn, foundStore.storeTurn, function(err, data) {
+                if (data) {
+                  turn.aproxTime = data.aproxTime;
+                  turn.queue = data.queue;
 
-                l('Turn sucessfully saved (%s)', newTurn._id);
-                res.json({ message: 'Turn created!', turnId: newTurn._id, userId: userId});
+                  console.log("aproxTimeTurn: ", turn.aproxTime);
+                  console.log("queueTurn: ", turn.queue);
+                }
+                  // save the turn and check for errors
+                  turn.save(function(err, newTurn) {
+                    console.log("newTurn", newTurn)
+                    if (err) {
+                      l('Turn save failed: %s', err);
+                      return res.json({message: err});
+                    }
+
+                    var user = new User();
+                    User.update({_id: userId}, {$push: {turns: turn._id}}, function (err, raw){
+                      if (err)
+                        return res.json({message: err});
+
+                      l('Turn sucessfully saved (%s)', newTurn._id);
+                      res.json({ message: 'Turn created!', turnId: newTurn._id, userId: userId});
+                    });
+                  });
               });
             });
         });
