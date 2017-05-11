@@ -17,6 +17,7 @@ var computeQueue = function(store) {
 module.exports.updateTurn = function updateTurn(turnId, obj, cb) {
   console.log("turnId: ", turnId);
   Turn.findById(turnId, function(err, foundTurn) {
+    console.log("foundTurn: ",foundTurn)
     if (err)
       return cb(err);
 
@@ -338,41 +339,35 @@ module.exports.addUserToStoreQueue = function addUserToStoreQueue(uid, sid, cb) 
   });
 };
 
-module.exports.removeStoreLastTurn = function removeStoreLastTurn (storeId, cb) {
+module.exports.removeStoreLastTurn = function removeStoreLastTurn (store, cb) {
 
   _async.waterfall([
-      //getStoreById(storeId, function(){}, callback)
-      function(callback) {
-        Store.findById(storeId, function(err, foundStore) {
-          if (err)
-            return cb(err);
-
-            console.log("foundStore: ", foundStore);
-          callback(null, foundStore ? foundStore : null);
-        });
-      },
-       function(store, callback) {
-         console.log("userIdFound: ", store.users[store.users.length - 1]);
+       function(callback) {
+         console.log("userIdFound: ", store.users[0]);
          request({
-          url: config.node.address + "/users/" + store.users[store.users.length - 1],
-          method: 'GET'
+          url: config.node.address + "/users/" + store.users[0],
+          method: 'GET',
+          json: true
         }, function(err, res, user) {
           console.log("user: ", user);
           if (err || res.statusCode != 200) {
             console.log(err);
             return;
           }
-          
+
           callback(null, user);
         });
        }
       ], function(err, user) {
-        console.log("UserTurns: ", user.turns);
-        var userTurnInStore = user.turns.filter(function(el) {return el.storeId === storeId;});
+        //user.toObject();
+        //console.log("UserTurns: ", user.turns);
+        console.log("store_id:", store._id)
+        var userTurnInStore = user.turns.filter(function(el) {return el.storeId == store._id;});
         console.log("UserTurnIDInStore", userTurnInStore);
         request({
-          url: config.node.address + "/turn/" + userTurnInStore[0],
-          method: 'DELETE'
+          url: config.node.address + "/turn/" + userTurnInStore[0]._id,
+          method: 'DELETE',
+          json: true
         }, function(err, res, body) {
           if (err || res.statusCode != 200) {
             console.log(err);
