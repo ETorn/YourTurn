@@ -338,6 +338,51 @@ module.exports.addUserToStoreQueue = function addUserToStoreQueue(uid, sid, cb) 
   });
 };
 
+module.exports.removeStoreLastTurn = function removeStoreLastTurn (storeId, cb) {
+
+  _async.waterfall([
+      //getStoreById(storeId, function(){}, callback)
+      function(callback) {
+        Store.findById(storeId, function(err, foundStore) {
+          if (err)
+            return cb(err);
+
+            console.log("foundStore: ", foundStore);
+          callback(null, foundStore ? foundStore : null);
+        });
+      },
+       function(store, callback) {
+         console.log("userIdFound: ", store.users[store.users.length - 1]);
+         request({
+          url: config.node.address + "/users/" + store.users[store.users.length - 1],
+          method: 'GET'
+        }, function(err, res, user) {
+          console.log("user: ", user);
+          if (err || res.statusCode != 200) {
+            console.log(err);
+            return;
+          }
+          
+          callback(null, user);
+        });
+       }
+      ], function(err, user) {
+        console.log("UserTurns: ", user.turns);
+        var userTurnInStore = user.turns.filter(function(el) {return el.storeId === storeId;});
+        console.log("UserTurnIDInStore", userTurnInStore);
+        request({
+          url: config.node.address + "/turn/" + userTurnInStore[0],
+          method: 'DELETE'
+        }, function(err, res, body) {
+          if (err || res.statusCode != 200) {
+            console.log(err);
+            return;
+          }
+          cb(null, body);
+        });
+      });
+}
+
 module.exports.removeUserFromStoreQueue = function removeUserFromStoreQueue(uid, sid, cb) {
   Store.update(
     {_id: sid},
@@ -364,6 +409,14 @@ module.exports.getStoreQueue = function getStoreQueue(id, cb) {
   Store.findById(id, function(err, foundStore) {
     if (err)
       return cb(err);
+
+    fcm.FCMNotificationBuilder()
+      .setTopic('store.' + foundStore._id)
+      .addData('storeQueue', foundStore.users.length)
+      .send(function(err, res) {
+      if (err)
+        console.log('FCM error:', err);
+    });
 
     cb(null, foundStore.users.length);
   });

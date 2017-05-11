@@ -18,6 +18,7 @@ var getStoreTurns = funcs.getStoreTurns;
 var notifyUser = funcs.notifyUser;
 var turnRequest = funcs.turnRequest;
 var updateTurn = funcs.updateTurn;
+var removeStoreLastTurn = funcs.removeStoreLastTurn;
 
 module.exports = function(router, mqttClient) {
 
@@ -214,12 +215,16 @@ module.exports = function(router, mqttClient) {
         if (err)
           res.json({message: err});
 
-        getStoreById(req.params.store_id, function(err, foundStore) {
+        /*getStoreById(req.params.store_id, function(err, foundStore) {
           var lastUserId = foundStore.users[foundStore.users.length - 1];
           removeUserFromStoreQueue(lastUserId, req.params.store_id, function(err, message){
             console.log(message);
           });
-        })
+        });*/
+
+        removeStoreLastTurn(req.params.store_id, function(err, result) {
+          console.log("result", result);
+        });
 
 
         mqttClient.publish('etorn/store/' + req.params.store_id + '/storeTurn', '' + result);

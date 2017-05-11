@@ -41,7 +41,9 @@ module.exports = function(router) {
   router.route('/users/:user_id')
     // get the user with that id (accessed at GET http://localhost:8080/users/:user_id)
     .get(function(req, res) {
-      User.findById(req.params.user_id, function(err, user) {
+      User.findById(req.params.user_id)
+      .populate('turns')
+      .exec(function(err, user) {
         if (err)
           return res.send(err);
 
