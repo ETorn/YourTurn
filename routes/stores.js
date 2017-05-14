@@ -117,7 +117,7 @@ module.exports = function(router, mqttClient) {
       getStoreById(req.params.store_id, function(err, result) {
         if (err)
           return res.json({message: err});
-
+          
         res.json(result);
       });
 
@@ -150,8 +150,11 @@ module.exports = function(router, mqttClient) {
         if (err)
           return res.json({message: err});
 
-        var disponibleTurn = result+1;
+        var storeQueue = result.store.users.length;
+        mqttClient.publish('etorn/store/' + req.params.store_id + '/queue', '' + storeQueue);
+
         mqttClient.publish('etorn/store/' + req.params.store_id + '/usersTurn', '' + disponibleTurn);
+        var disponibleTurn = result+1;
 
         postEvent('advanced turn', req.params.store_id, function(err,response) {
           if (err)

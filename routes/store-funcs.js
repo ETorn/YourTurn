@@ -331,7 +331,11 @@ module.exports.addUserToStoreQueue = function addUserToStoreQueue(uid, sid, cb) 
             if (err)
               return cb(err);
 
-            cb(null, userTurn);
+            var data = {
+              userTurn: userTurn,
+              store: storeToUpdate
+            };
+            cb(null, data);
           });
         });
       }
