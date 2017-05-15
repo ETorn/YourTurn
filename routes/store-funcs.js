@@ -345,6 +345,9 @@ module.exports.addUserToStoreQueue = function addUserToStoreQueue(uid, sid, cb) 
 
 module.exports.removeStoreLastTurn = function removeStoreLastTurn (store, cb) {
 
+  if (store.users[0] == undefined)
+    return cb(null, "User not found");
+    
   _async.waterfall([
        function(callback) {
          console.log("userIdFound: ", store.users[0]);
