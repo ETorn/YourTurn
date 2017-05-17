@@ -23,6 +23,7 @@ var removeStoreLastTurn = funcs.removeStoreLastTurn;
 module.exports = function(router, mqttClient) {
 
   mqttClient.subscribe('etorn/store/+/advance');
+  mqttClient.subscribe('etorn/store/+/aproxTime');
   mqttClient.subscribe('etorn/store/+/idk');
 
   mqttClient.on('message', function(topic, message) {
@@ -38,7 +39,6 @@ module.exports = function(router, mqttClient) {
 
     if (chan === 'aproxTime') {
       //Cada vegada que caesar envia el temps aproximat, actualitzem la store
-      console.log("CaesarMessage: ", message);
       updateStore(id, {aproxTime: message}, function(){});
     }
 
@@ -117,7 +117,7 @@ module.exports = function(router, mqttClient) {
       getStoreById(req.params.store_id, function(err, result) {
         if (err)
           return res.json({message: err});
-          
+
         res.json(result);
       });
 
