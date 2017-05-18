@@ -39,7 +39,7 @@ module.exports = function(router, mqttClient) {
 
     if (chan === 'aproxTime') {
       //Cada vegada que caesar envia el temps aproximat, actualitzem la store
-      updateStore(id, {aproxTime: parseFloat(message.toString('utf8'))}, function(){});
+      updateStore(id, {aproxTime: parseFloat(message.toString('utf8'))}, function(){}); // Convertim a utf8 el missatge ja que ve del caesar com a un buffer de bytes i el parsejem
     }
 
     if (chan === 'advance') {
@@ -54,8 +54,6 @@ module.exports = function(router, mqttClient) {
           var userIds = result.map(function(u) {
             return u.userId;
           });
-
-          console.log('userIds: ',userIds);
 
           for (i = 0; i < turns.length; i++) {
             mqttClient.publish('etorn/store/' + id + '/user/' + userIds[i] + '/queue');
@@ -160,12 +158,6 @@ module.exports = function(router, mqttClient) {
           mqttClient.publish('etorn/store/' + req.params.store_id + '/aproxTime', '' + time);
         });
 
-        /* Comentat ja que al demanar torn, si retornem la cua de la store, sera +1 a la actual
-        getStoreQueue(req.params.store_id, function(err, queue) {
-          if (!err)
-            mqttClient.publish('etorn/store/' + req.params.store_id + '/queue', '' + queue);
-        });*/
-
         res.json({message: 'User added to store queue!', turn: result});
       });
 
@@ -234,10 +226,6 @@ module.exports = function(router, mqttClient) {
             }
           ], function (err, body) {
             getStoreTurns(req.params.store_id, function(err, turns) {
-              console.log("turns", turns);
-              /*var userIds = turns.map(function(u) {
-                return u.userId;
-              });*/
 
               //Torns d'una store que ha avançat
               //Augmentar torns amb user info
@@ -250,7 +238,6 @@ module.exports = function(router, mqttClient) {
                 //update de queue i temps dels torns
 
                 _async.each(arr, function (turn, cb){
-                  console.log("TurnToUpdate: ", turn)
                   updateTurn(turn.turnId, turn, function(){
                     cb(null);
                   })
@@ -259,8 +246,6 @@ module.exports = function(router, mqttClient) {
 
                 //enviar notis cua
                 for (i = 0; i < arr.length; i++) {
-                  console.log("aproxTime: ", arr[i].aproxTime);
-                  //mqttClient.publish('etorn/store/' + req.params.store_id + '/user/' + userIds[i] + '/queue');
                   fcm.FCMNotificationBuilder()
                     .setTopic('store.' + req.params.store_id + '.user.' + arr[i].user._id)
                     .addData('storeTurn', 'advance')
@@ -279,8 +264,6 @@ module.exports = function(router, mqttClient) {
                 _async.each(toSend, function(el, cb){
 
                   //Per cada torn demanat en aquesta parada, avisem a la app que ha de restar -1 a la cua del usuari
-                //  for (i = 0; i < turns.length; i++) {
-                    //mqttClient.publish('etorn/store/' + req.params.store_id + '/user/' + userIds[i] + '/queue');
                     fcm.FCMNotificationBuilder()
                     .setTopic('store.' + req.params.store_id + '.user.' + el.user._id)
                     .addData('notification', el.queue) //App decideix quin missatge enviar com a notificacio
@@ -291,7 +274,6 @@ module.exports = function(router, mqttClient) {
 
                       cb(null);
                     });
-                //  }
                 },
 
                 function(err) {

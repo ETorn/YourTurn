@@ -16,9 +16,7 @@ var computeQueue = function(store) {
 }
 
 module.exports.updateTurn = function updateTurn(turnId, obj, cb) {
-  console.log("turnId: ", turnId);
   Turn.findById(turnId, function(err, foundTurn) {
-    console.log("foundTurn: ",foundTurn)
     if (err)
       return cb(err);
 
@@ -118,9 +116,7 @@ var turnRequest = module.exports.turnRequest = function turnRequest(turn, storeT
         return cb(null);
 
       //Si la resta entre el torn actual de la parada i el torn demanat per l'usuari = les seves preferencies, retornem
-      var queue = turn.turn - storeTurn; // Aixo nomes funciona amb els torns de manera sequencial
-      console.log("queue", queue);
-      console.log("turnIDEEEEEE: ", turn)
+      var queue = turn.turn - storeTurn; // Aixo nomes funciona amb els torns de manera sequencial!!!!!!!!
 
       var data = {
         turnId: turn._id,
@@ -128,16 +124,13 @@ var turnRequest = module.exports.turnRequest = function turnRequest(turn, storeT
         queue: queue
       };
 
-      console.log("notificationTurns", user.notificationTurns);
       data.notify = queue == user.notificationTurns;
-
 
       getAverageTime(turn.storeId, function (err, time) {
         if (err)
           return cb(err);
           if (turn.queue) {
             data.aproxTime = parseFloat((time).toFixed(1)) * turn.queue; // temps aproximat del usuari
-            console.log("Returning aproxTime: ", data.aproxTime);
           }
         return cb(null, data);
       });
@@ -359,7 +352,6 @@ module.exports.removeStoreLastTurn = function removeStoreLastTurn (store, cb) {
           method: 'GET',
           json: true
         }, function(err, res, user) {
-          console.log("user: ", user);
           if (err || res.statusCode != 200) {
             console.log(err);
             return;
@@ -369,11 +361,7 @@ module.exports.removeStoreLastTurn = function removeStoreLastTurn (store, cb) {
         });
        }
       ], function(err, user) {
-        //user.toObject();
-        //console.log("UserTurns: ", user.turns);
-        console.log("store_id:", store._id)
         var userTurnInStore = user.turns.filter(function(el) {return el.storeId == store._id;});
-        console.log("UserTurnIDInStore", userTurnInStore);
         request({
           url: config.node.address + "/turn/" + userTurnInStore[0]._id,
           method: 'DELETE',
