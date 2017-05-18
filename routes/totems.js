@@ -73,7 +73,7 @@ module.exports = function(router) {
       if (err)
         return res.send(err);
 
-      res.json({superId: totem.superId});
+      res.json({totem: totem});
     });
   });
 

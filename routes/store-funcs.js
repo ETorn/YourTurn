@@ -7,6 +7,7 @@ var Store = require('../models/Store');
 var Super = require('../models/Super');
 var Turn = require('../models/Turn');
 var User = require('../models/User');
+var Totem = require('../models/Totem');
 
 var computeQueue = function(store) {
   store = store.toObject();
@@ -273,73 +274,76 @@ module.exports.addUserToStoreQueue = function addUserToStoreQueue(uid, sid, cb) 
     if(err)
       return cb(err);
 
-    if (store.length > 0)
-     return cb('This user already picked a ticket in this store!');
+    Totem.find({_id: uid}, function(err, totem) {
 
-    Store.findByIdAndUpdate(
-      {_id: sid},
-      {$push: {users: uid}},
-      {safe: true, upsert: true, new: true},
-      function (err, storeToUpdate){
-        if (err)
-          return cb(err);
+      if (store.length > 0 && totem === undefined)
+         return cb('This user already picked a ticket in this store!');
 
-        var userTurn = storeToUpdate.usersTurn;
-        storeToUpdate.usersTurn++;
+      Store.findByIdAndUpdate(
+        {_id: sid},
+        {$push: {users: uid}},
+        {safe: true, upsert: true, new: true},
+        function (err, storeToUpdate){
+          if (err)
+            return cb(err);
 
-        if (storeToUpdate.usersTurn > config.stores.maxTurn)
-          storeToUpdate.usersTurn = 1;
+          var userTurn = storeToUpdate.usersTurn;
+          storeToUpdate.usersTurn++;
 
-        fcm.FCMNotificationBuilder()
-          .setTopic('store.' + storeToUpdate._id)
-          .addData('usersTurn', storeToUpdate.usersTurn)
-          .addData('storeQueue',storeToUpdate.users.length)
-          .send(function(err, res) {
-           if (err)
-             console.log('FCM error:', err);
-          });
+          if (storeToUpdate.usersTurn > config.stores.maxTurn)
+            storeToUpdate.usersTurn = 1;
+
+          fcm.FCMNotificationBuilder()
+            .setTopic('store.' + storeToUpdate._id)
+            .addData('usersTurn', storeToUpdate.usersTurn)
+            .addData('storeQueue',storeToUpdate.users.length)
+            .send(function(err, res) {
+            if (err)
+              console.log('FCM error:', err);
+            });
 
 
-          // update time i queue
-          var turn = new Turn();
-          turn.storeId = storeToUpdate._id;
-          turn.turn = userTurn;
-          turn.userId = uid;
+            // update time i queue
+            var turn = new Turn();
+            turn.storeId = storeToUpdate._id;
+            turn.turn = userTurn;
+            turn.userId = uid;
 
-          turnRequest(turn, storeToUpdate.storeTurn, function(err, data) {
-            if (data) {
-              turn.aproxTime = data.aproxTime;
-              turn.queue = data.queue;
-            }
+            turnRequest(turn, storeToUpdate.storeTurn, function(err, data) {
+              if (data) {
+                turn.aproxTime = data.aproxTime;
+                turn.queue = data.queue;
+              }
 
-            turn.save(function(err, newTurn) {
+              turn.save(function(err, newTurn) {
+                if (err)
+                  return cb(err);
+
+                  User.findByIdAndUpdate(
+                    {_id: uid},
+                    {$push: {turns: newTurn._id}},
+                    {safe: true, upsert: true, new: true},
+                    function (err, foundUser) {
+                      if (err)
+                        return cb(err);
+                    }
+                  )
+              });
+
+            storeToUpdate.save(function(err) {
               if (err)
                 return cb(err);
 
-                User.findByIdAndUpdate(
-                  {_id: uid},
-                  {$push: {turns: newTurn._id}},
-                  {safe: true, upsert: true, new: true},
-                  function (err, foundUser) {
-                    if (err)
-                      return cb(err);
-                  }
-                )
+              var data = {
+                userTurn: userTurn,
+                store: storeToUpdate
+              };
+              cb(null, data);
             });
-
-          storeToUpdate.save(function(err) {
-            if (err)
-              return cb(err);
-
-            var data = {
-              userTurn: userTurn,
-              store: storeToUpdate
-            };
-            cb(null, data);
           });
-        });
-      }
-    );
+        }
+      );
+    });
   });
 };
 
