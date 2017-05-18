@@ -39,7 +39,7 @@ module.exports = function(router, mqttClient) {
 
     if (chan === 'aproxTime') {
       //Cada vegada que caesar envia el temps aproximat, actualitzem la store
-      updateStore(id, {aproxTime: message}, function(){});
+      updateStore(id, {aproxTime: parseFloat(message.toString('utf8'))}, function(){});
     }
 
     if (chan === 'advance') {
@@ -156,16 +156,7 @@ module.exports = function(router, mqttClient) {
         mqttClient.publish('etorn/store/' + req.params.store_id + '/usersTurn', '' + disponibleTurn);
         var disponibleTurn = result+1;
 
-        postEvent('advanced turn', req.params.store_id, function(err,response) {
-          if (err)
-            return res.json({message: err});
-          console.log('advanced turn');
-        });
-
         getAverageTime(req.params.store_id, function(err, time) {
-          if (err)
-            return res.json({message: err});
-
           mqttClient.publish('etorn/store/' + req.params.store_id + '/aproxTime', '' + time);
         });
 
@@ -217,6 +208,12 @@ module.exports = function(router, mqttClient) {
       advanceStoreTurn(req.params.store_id, function(err, result) {
         if (err)
           res.json({message: err});
+
+        postEvent('advanced turn', req.params.store_id, function(err,response) {
+          if (err)
+            return res.json({message: err});
+          console.log('advanced turn');
+        });
 
         mqttClient.publish('etorn/store/' + req.params.store_id + '/storeTurn', '' + result);
 
