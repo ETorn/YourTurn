@@ -275,8 +275,7 @@ module.exports.addUserToStoreQueue = function addUserToStoreQueue(uid, sid, cb) 
       return cb(err);
 
     Totem.find({_id: uid}, function(err, totem) {
-
-      if (store.length > 0 && totem === undefined)
+      if (store.length > 0 && totem.length == 0)
          return cb('This user already picked a ticket in this store!');
 
       Store.findByIdAndUpdate(
@@ -351,7 +350,7 @@ module.exports.removeStoreLastTurn = function removeStoreLastTurn (store, cb) {
 
   if (store.users[0] == undefined)
     return cb(null, "User not found");
-    
+
   _async.waterfall([
        function(callback) {
          console.log("userIdFound: ", store.users[0]);
