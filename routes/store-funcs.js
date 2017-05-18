@@ -267,75 +267,94 @@ module.exports.addUserToStoreQueue = function addUserToStoreQueue(uid, sid, cb) 
     if(err)
       return cb(err);
 
-    Totem.find({_id: uid}, function(err, totem) {
+    Totem.find({_id: uid}, function(err, totem) { //Sino trobem cap totem amb aquesta id vol dir que aquesta id es d'un usuari
+                                                  //i si store.length > 0 vol dir que ja ha demanat torn en aquella parada
       if (store.length > 0 && totem.length == 0)
          return cb('This user already picked a ticket in this store!');
 
-      Store.findByIdAndUpdate(
-        {_id: sid},
-        {$push: {users: uid}},
-        {safe: true, upsert: true, new: true},
-        function (err, storeToUpdate){
-          if (err)
-            return cb(err);
-
-          var userTurn = storeToUpdate.usersTurn;
-          storeToUpdate.usersTurn++;
-
-          if (storeToUpdate.usersTurn > config.stores.maxTurn)
-            storeToUpdate.usersTurn = 1;
-
-          fcm.FCMNotificationBuilder()
-            .setTopic('store.' + storeToUpdate._id)
-            .addData('usersTurn', storeToUpdate.usersTurn)
-            .addData('storeQueue',storeToUpdate.users.length)
-            .send(function(err, res) {
-            if (err)
-              console.log('FCM error:', err);
+      //Executem el seguent codi amb waterfall per a que si es dona el cas de que el torn demanat ve d'un totem
+      //Creem un nou usuari "fantasma" que pertany a aquell totem i a continuacio treballem amb aquella userID
+      _async.waterfall([
+        function(callback) {
+          var userId = uid;
+          //La id pertany a un totem
+          if (totem.length > 0) {
+            //Creem un usuari "fantasma" per al totem per aquell torn demanat
+            var totemUser = new User();
+            totemUser.totemId = uid; //Asignem el totemID
+            totemUser.save(function(err, newTotemUser) {
+              userId = newTotemUser._id;
+              callback(null, userId);
             });
-
-
-            // update time i queue
-            var turn = new Turn();
-            turn.storeId = storeToUpdate._id;
-            turn.turn = userTurn;
-            turn.userId = uid;
-
-            turnRequest(turn, storeToUpdate.storeTurn, function(err, data) {
-              if (data) {
-                turn.aproxTime = data.aproxTime;
-                turn.queue = data.queue;
-              }
-
-              turn.save(function(err, newTurn) {
-                if (err)
-                  return cb(err);
-
-                  User.findByIdAndUpdate(
-                    {_id: uid},
-                    {$push: {turns: newTurn._id}},
-                    {safe: true, upsert: true, new: true},
-                    function (err, foundUser) {
-                      if (err)
-                        return cb(err);
-                    }
-                  )
-              });
-
-            storeToUpdate.save(function(err) {
+          }
+        }
+      ], function (err, idUserResult) {
+          Store.findByIdAndUpdate(
+            {_id: sid},
+            {$push: {users: idUserResult}},
+            {safe: true, upsert: true, new: true},
+            function (err, storeToUpdate){
               if (err)
                 return cb(err);
 
-              var data = {
-                userTurn: userTurn,
-                store: storeToUpdate
-              };
-              cb(null, data);
-            });
-          });
-        }
-      );
-    });
+              var userTurn = storeToUpdate.usersTurn;
+              storeToUpdate.usersTurn++;
+
+              if (storeToUpdate.usersTurn > config.stores.maxTurn)
+                storeToUpdate.usersTurn = 1;
+
+              fcm.FCMNotificationBuilder()
+                .setTopic('store.' + storeToUpdate._id)
+                .addData('usersTurn', storeToUpdate.usersTurn)
+                .addData('storeQueue',storeToUpdate.users.length)
+                .send(function(err, res) {
+                if (err)
+                  console.log('FCM error:', err);
+                });
+
+
+                // update time i queue
+                var turn = new Turn();
+                turn.storeId = storeToUpdate._id;
+                turn.turn = userTurn;
+                turn.userId = idUserResult;
+
+                turnRequest(turn, storeToUpdate.storeTurn, function(err, data) {
+                  if (data) {
+                    turn.aproxTime = data.aproxTime;
+                    turn.queue = data.queue;
+                  }
+
+                  turn.save(function(err, newTurn) {
+                    if (err)
+                      return cb(err);
+
+                      User.findByIdAndUpdate(
+                        {_id: idUserResult},
+                        {$push: {turns: newTurn._id}},
+                        {safe: true, upsert: true, new: true},
+                        function (err, foundUser) {
+                          if (err)
+                            return cb(err);
+                        }
+                      )
+                  });
+
+                storeToUpdate.save(function(err) {
+                  if (err)
+                    return cb(err);
+
+                  var data = {
+                    userTurn: userTurn,
+                    store: storeToUpdate
+                  };
+                  cb(null, data);
+                });
+              });
+            }
+          );
+        });
+      });
   });
 };
 
