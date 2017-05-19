@@ -202,16 +202,7 @@ var getAverageTime = module.exports.getAverageTime = function getAverageTime(sto
     url: config.caesar.address + "/averageTime/" + storeId,
     method: 'GET',
     json: true
-  }, function(err, res, body) {
-
-//Per a que notificarho aqui ?¿
-    fcm.FCMNotificationBuilder()
-      .setTopic('store.' + storeId)
-      .addData('aproxTime', body) // arriba null
-      .send(function(err, res) {
-       if (err)
-         console.log('FCM error:', err);
-      });
+  }, function(err, res, body) {    
       cb(err,body);
   });
 }

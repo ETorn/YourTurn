@@ -155,7 +155,17 @@ module.exports = function(router, mqttClient) {
         var disponibleTurn = result+1;
 
         getAverageTime(req.params.store_id, function(err, time) {
+          if (time == -1)
+            return; //Si el temps aproximat es -1 (no hi han events en els pasats 15 min) no notifiquem
+
           mqttClient.publish('etorn/store/' + req.params.store_id + '/aproxTime', '' + time);
+          fcm.FCMNotificationBuilder()
+          .setTopic('store.' + req.params.store_id)
+          .addData('aproxTime', time)
+          .send(function(err, res) {
+          if (err)
+            console.log('FCM error:', err);
+          });
         });
 
         res.json({message: 'User added to store queue!', turn: result});
