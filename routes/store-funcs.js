@@ -130,7 +130,8 @@ var turnRequest = module.exports.turnRequest = function turnRequest(turn, storeT
         if (err)
           return cb(err);
           if (turn.queue) {
-            data.aproxTime = parseFloat((time).toFixed(1)) * turn.queue; // temps aproximat del usuari
+            // temps aproximat del usuari
+            data.aproxTime = parseFloat((time).toFixed(1)) * turn.queue - 1; // queue -1 perque per alguna rao, si la cua es 5, multiplica per 6
           }
         return cb(null, data);
       });
