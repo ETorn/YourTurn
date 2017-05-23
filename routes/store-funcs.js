@@ -202,7 +202,7 @@ var getAverageTime = module.exports.getAverageTime = function getAverageTime(sto
     url: config.caesar.address + "/averageTime/" + storeId,
     method: 'GET',
     json: true
-  }, function(err, res, body) {    
+  }, function(err, res, body) {
       cb(err,body);
   });
 }
@@ -275,9 +275,11 @@ module.exports.addUserToStoreQueue = function addUserToStoreQueue(uid, sid, cb) 
             totemUser.totemId = uid; //Asignem el totemID
             totemUser.save(function(err, newTotemUser) {
               userId = newTotemUser._id;
-              callback(null, userId);
+              return callback(null, userId);
             });
           }
+          else
+            callback(null,userId);
         }
       ], function (err, idUserResult) {
           Store.findByIdAndUpdate(
