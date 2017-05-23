@@ -147,12 +147,11 @@ module.exports = function(router, mqttClient) {
       addUserToStoreQueue(req.params.user_id, req.params.store_id, function(err, result) {
         if (err)
           return res.json({message: err});
-
         var storeQueue = result.store.users.length;
         mqttClient.publish('etorn/store/' + req.params.store_id + '/queue', '' + storeQueue);
 
+        var disponibleTurn = result.store.usersTurn;
         mqttClient.publish('etorn/store/' + req.params.store_id + '/usersTurn', '' + disponibleTurn);
-        var disponibleTurn = result+1;
 
         getAverageTime(req.params.store_id, function(err, time) {
           if (time == -1)
@@ -168,7 +167,7 @@ module.exports = function(router, mqttClient) {
           });
         });
 
-        res.json({message: 'User added to store queue!', turn: result});
+        res.json({message: 'User added to store queue!', turn: result.userTurn});
       });
 
     })
