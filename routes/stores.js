@@ -228,12 +228,12 @@ module.exports = function(router, mqttClient) {
           //Posiblement canviar a una millor solucio
           _async.series([
             function(callback) {
-              removeStoreLastTurn(foundStore, function(err, message) {
-                console.log("message", message);
-                callback(null, null);
+              removeStoreLastTurn(foundStore, function(err, deletedUser) {
+                console.log("message", deletedUser);
+                callback(null, deletedUser);
               });
             }
-          ], function (err, body) {
+          ], function (err, deletedUser) {
             getStoreTurns(req.params.store_id, function(err, turns) {
 
               //Torns d'una store que ha avançat
@@ -252,6 +252,14 @@ module.exports = function(router, mqttClient) {
                   })
                 });
 
+                //notificar al ultim usuari de la cua, la app avisara de que es el seu torn
+                fcm.FCMNotificationBuilder()
+                  .setTopic('store.' + req.params.store_id + '.user.' + deletedUser._id)
+                  .addData('storeTurn', 'advance')
+                  .send(function(err, res) {
+                   if (err)
+                     console.log('FCM error:', err);
+                  });
 
                 //enviar notis cua
                 for (i = 0; i < arr.length; i++) {

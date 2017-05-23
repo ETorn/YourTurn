@@ -384,7 +384,7 @@ module.exports.removeStoreLastTurn = function removeStoreLastTurn (store, cb) {
             console.log(err);
             return;
           }
-          cb(null, body);
+          cb(null, user);
         });
       });
 }
