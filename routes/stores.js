@@ -250,51 +250,52 @@ module.exports = function(router, mqttClient) {
                   updateTurn(turn.turnId, turn, function(){
                     cb(null);
                   })
-                });
+                }, function(err) {
 
-                //notificar al ultim usuari de la cua, la app avisara de que es el seu torn
-                fcm.FCMNotificationBuilder()
-                  .setTopic('store.' + req.params.store_id + '.user.' + deletedUser._id)
-                  .addData('storeTurn', 'advance')
-                  .send(function(err, res) {
-                   if (err)
-                     console.log('FCM error:', err);
-                  });
+                  //notificar al ultim usuari de la cua, la app avisara de que es el seu torn
+                  var fcmtmp = fcm.FCMNotificationBuilder()
+                    .setTopic('store.' + req.params.store_id + '.user.' + deletedUser._id)
+                    .addData('storeTurn', 'advance');
 
-                //enviar notis cua
-                for (i = 0; i < arr.length; i++) {
-                  fcm.FCMNotificationBuilder()
-                    .setTopic('store.' + req.params.store_id + '.user.' + arr[i].user._id)
-                    .addData('storeTurn', 'advance')
-                    .addData('queue', arr[i].queue)
-                    .addData('aproxTime', arr[i].aproxTime)
+                  if (deletedUser.notify)
+                    fcmtmp
+                      .addData('notification', 0);  // Forcem 0 a la cua per que al esborrar l'usuari aquesta propietat no estarà actualitzada
+
+                  fcmtmp
                     .send(function(err, res) {
                      if (err)
                        console.log('FCM error:', err);
                     });
-                }
 
-                //filtrar, decidir si cal notificacio per user
-                var toSend = arr.filter(function(el) {return el.notify;});
+                  //filtrar, decidir si cal notificacio per user
+                  var toSend = arr;//.filter(function(el) {return el.notify;});
 
-                //enviar notis
-                _async.each(toSend, function(el, cb){
+                  //enviar notis
+                  _async.each(toSend, function(el, cb){
 
-                  //Per cada torn demanat en aquesta parada, avisem a la app que ha de restar -1 a la cua del usuari
-                    fcm.FCMNotificationBuilder()
-                    .setTopic('store.' + req.params.store_id + '.user.' + el.user._id)
-                    .addData('notification', el.queue) //App decideix quin missatge enviar com a notificacio
-                    .addData('aproxTime', el.aproxTime)
-                    .send(function(err, res) {
-                      if (err)
-                        console.log('FCM error:', err);
+                    //Per cada torn demanat en aquesta parada, avisem a la app que ha de restar -1 a la cua del usuari
+                    var fcmtmp = fcm.FCMNotificationBuilder()
+                      .setTopic('store.' + req.params.store_id + '.user.' + el.user._id)
+                      .addData('storeTurn', 'advance')
+                      .addData('queue', el.queue)
+                      .addData('aproxTime', el.aproxTime);
 
-                      cb(null);
-                    });
-                },
+                    if (el.notify)
+                      fcmtmp
+                        .addData('notification', el.queue) //App decideix quin missatge enviar com a notificacio
 
-                function(err) {
-                  res.json({message: 'StoreTurn updated', storeTurn: result});
+                    fcmtmp
+                      .send(function(err, res) {
+                        if (err)
+                          console.log('FCM error:', err);
+
+                        cb(null);
+                      });
+                  },
+
+                  function(err) {
+                    res.json({message: 'StoreTurn updated', storeTurn: result});
+                  });
                 });
               });
             });
