@@ -48,6 +48,19 @@ _async.series([
       });
     },
     function(cb) {
+      console.log('Subsciu-te a la store corresponent i apreta intro quan estiguis preparat');
+      var stdin = process.stdin;
+      stdin.setRawMode( true );
+      stdin.setEncoding( 'utf8' );
+      stdin.resume();
+      stdin.on( 'data', function listener( key ){
+        if ( key === '\r' ) {
+          stdin.removeListener('data', listener);
+          cb(null);
+        }
+      });
+    },
+    function(cb) {
       console.log("Avançant el torn " + turns + " vegades a " + storeId + " amb 1 segon de interval");
       var count = 0;
       _async.whilst(
