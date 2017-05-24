@@ -226,11 +226,11 @@ module.exports = function(router, mqttClient) {
         getStoreById(req.params.store_id, function(err, foundStore) {
 
           //Posiblement canviar a una millor solucio
-          _async.series([
+          _async.waterfall([
             function(callback) {
-              removeStoreLastTurn(foundStore, function(err, deletedUser) {
-                console.log("message", deletedUser);
-                callback(null, deletedUser);
+              removeStoreLastTurn(foundStore, function(err, user) {
+                console.log("message", user);
+                callback(null, user);
               });
             }
           ], function (err, deletedUser) {
@@ -253,6 +253,7 @@ module.exports = function(router, mqttClient) {
                 }, function(err) {
 
                   //notificar al ultim usuari de la cua, la app avisara de que es el seu torn
+                  console.log("deletedUserID: ", deletedUser._id);
                   var fcmtmp = fcm.FCMNotificationBuilder()
                     .setTopic('store.' + req.params.store_id + '.user.' + deletedUser._id)
                     .addData('storeTurn', 'advance');
