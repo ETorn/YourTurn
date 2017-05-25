@@ -118,8 +118,17 @@ var advanceTurn = function (storeID, mqttClient, callback) {
                   var fcmtmp = fcm.FCMNotificationBuilder()
                     .setTopic('store.' + storeID + '.user.' + el.user._id)
                     .addData('storeTurn', foundStore.storeTurn)
-                    .addData('queue', el.queue)
-                    .addData('aproxTime', el.aproxTime);
+                    .addData('queue', el.queue);
+
+                  var timeToSend;
+
+                  if (el.aproxTime != 0 && el.aproxTime != -1)
+                    timeToSend = el.aproxTime;
+                  else
+                    timeToSend = foundStore.storeTurn * el.queue;
+
+                  fcmtmp
+                    .addData('aproxTime', timeToSend)
 
                   if (el.notify)
                     fcmtmp
