@@ -223,6 +223,18 @@ module.exports = function(router, mqttClient) {
             mqttClient.publish('etorn/store/' + req.params.store_id + '/queue', '' + queue);
         });
 
+        getAverageTime(req.params.store_id, function(err, result) {
+          if (!err) {
+            fcm.FCMNotificationBuilder()
+            .setTopic('store.' + req.params.store_id)
+            .addData('aproxTime', result)
+            .send(function(err, res) {
+            if (err)
+              console.log('FCM error:', err);
+            });
+          }
+        });
+
         getStoreById(req.params.store_id, function(err, foundStore) {
 
           //Posiblement canviar a una millor solucio

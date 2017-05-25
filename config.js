@@ -10,7 +10,7 @@ module.exports = {
     address: 'http://localhost:8080'  //El port ha de coincidir amb la linia anterior
   },
   caesar: {
-    port:8080,
+    port:8081,
     address: 'http://localhost:8081'  //El port ha de coincidir amb la linia anterior
   },
   stores: {
