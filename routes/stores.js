@@ -34,7 +34,7 @@ var advanceTurn = function (storeID, mqttClient, callback) {
     mqttClient.publish('etorn/store/' + storeID + '/storeTurn', '' + result);
 
     _async.waterfall([
-      function(callback) { 
+      function(callback) {
         getStoreQueue(storeID, function(err, queue) {
           if (!err)
             mqttClient.publish('etorn/store/' + storeID + '/queue', '' + queue);
@@ -42,94 +42,100 @@ var advanceTurn = function (storeID, mqttClient, callback) {
         });
       }
     ], function(err, queue) {
-      getAverageTime(storeID, function(err, time) {
-        if (!err) {
-          fcm.FCMNotificationBuilder()
-          .setTopic('store.' + storeID)
-          .addData('aproxTime', parseFloat((time).toFixed(1)) * queue) // queue -1 perque per alguna rao, si la cua es 5, multiplica per 6
-          .send(function(err, res) {
-          if (err)
-            console.log('FCM error:', err);
-          });
-        }
-      });
-    });
-    
+      getStoreById(storeID, function(err, foundStore) {
 
-    
-
-    getStoreById(storeID, function(err, foundStore) {
-
-      //Posiblement canviar a una millor solucio
-      _async.waterfall([
-        function(callback) {
-          removeStoreLastTurn(foundStore, function(err, user) {
-            console.log("message", user);
-            callback(null, user);
-          });
-        }
-      ], function (err, deletedUser) {
-        getStoreTurns(storeID, function(err, turns) {
-
-          //Torns d'una store que ha avançat
-          //Augmentar torns amb user info
-          //Calcular cua usuari individual
-          _async.map(turns, function(el, cb) {
-            funcs.turnRequest(el, result, function(err, data) {
-              cb(err, data);
+        getAverageTime(storeID, function(err, time) {
+          var timeToSend;
+          if (!err) {
+            if (time != 0 && time != -1) {
+              timeToSend = parseFloat((time).toFixed(1)) * queue;
+              updateStore(storeID, {aproxTime: timeToSend}, function(){});
+              console.log("UpdateStore; time: ", parseFloat((time).toFixed(1)) * queue);
+            }
+            else {
+              timeToSend = foundStore.aproxTime * queue;
+            }
+            fcm.FCMNotificationBuilder()
+            .setTopic('store.' + storeID)
+            .addData('aproxTime', timeToSend)
+            .send(function(err, res) {
+            if (err)
+              console.log('FCM error:', err);
             });
-          }, function(err, arr) {
-            //update de queue i temps dels torns
+          }
+        });
 
-            _async.each(arr, function (turn, cb){
-              updateTurn(turn.turnId, turn, function(){
-                cb(null);
-              })
-            }, function(err) {
+        //Posiblement canviar a una millor solucio
+        _async.waterfall([
+          function(callback) {
+            removeStoreLastTurn(foundStore, function(err, user) {
+              console.log("message", user);
+              callback(null, user);
+            });
+          }
+        ], function (err, deletedUser) {
+          getStoreTurns(storeID, function(err, turns) {
 
-              //notificar al ultim usuari de la cua, la app avisara de que es el seu torn
-              console.log("deletedUserID: ", deletedUser._id);
-              var fcmtmp = fcm.FCMNotificationBuilder()
-                .setTopic('store.' + storeID + '.user.' + deletedUser._id)
-                .addData('storeTurn', 'advance');
+            //Torns d'una store que ha avançat
+            //Augmentar torns amb user info
+            //Calcular cua usuari individual
+            _async.map(turns, function(el, cb) {
+              funcs.turnRequest(el, result, function(err, data) {
+                cb(err, data);
+              });
+            }, function(err, arr) {
+              //update de queue i temps dels torns
 
-              if (deletedUser.notify)
-                fcmtmp
-                  .addData('notification', 0);  // Forcem 0 a la cua per que al esborrar l'usuari aquesta propietat no estarà actualitzada
+              _async.each(arr, function (turn, cb){
+                updateTurn(turn.turnId, turn, function(){
+                  cb(null);
+                })
+              }, function(err) {
 
-              fcmtmp
-                .send(function(err, res) {
-                  if (err)
-                    console.log('FCM error:', err);
-                });
-
-              //filtrar, decidir si cal notificacio per user
-              var toSend = arr;//.filter(function(el) {return el.notify;});
-
-              //enviar notis
-              _async.each(toSend, function(el, cb){
-
-                //Per cada torn demanat en aquesta parada, avisem a la app que ha de restar -1 a la cua del usuari
+                //notificar al ultim usuari de la cua, la app avisara de que es el seu torn
+                console.log("deletedUserID: ", deletedUser._id);
                 var fcmtmp = fcm.FCMNotificationBuilder()
-                  .setTopic('store.' + storeID + '.user.' + el.user._id)
-                  .addData('storeTurn', 'advance')
-                  .addData('queue', el.queue)
-                  .addData('aproxTime', el.aproxTime);
+                  .setTopic('store.' + storeID + '.user.' + deletedUser._id)
+                  .addData('storeTurn', foundStore.storeTurn);
 
-                if (el.notify)
+                if (deletedUser.notify)
                   fcmtmp
-                    .addData('notification', el.queue) //App decideix quin missatge enviar com a notificacio
+                    .addData('notification', 0);  // Forcem 0 a la cua per que al esborrar l'usuari aquesta propietat no estarà actualitzada
 
                 fcmtmp
                   .send(function(err, res) {
                     if (err)
                       console.log('FCM error:', err);
-
-                    cb(null);
                   });
-              },
-              function(err) {
-                callback(err, {message: 'StoreTurn updated', storeTurn: result});
+
+                //filtrar, decidir si cal notificacio per user
+                var toSend = arr;//.filter(function(el) {return el.notify;});
+
+                //enviar notis
+                _async.each(toSend, function(el, cb){
+
+                  //Per cada torn demanat en aquesta parada, avisem a la app que ha de restar -1 a la cua del usuari
+                  var fcmtmp = fcm.FCMNotificationBuilder()
+                    .setTopic('store.' + storeID + '.user.' + el.user._id)
+                    .addData('storeTurn', foundStore.storeTurn)
+                    .addData('queue', el.queue)
+                    .addData('aproxTime', el.aproxTime);
+
+                  if (el.notify)
+                    fcmtmp
+                      .addData('notification', el.queue) //App decideix quin missatge enviar com a notificacio
+
+                  fcmtmp
+                    .send(function(err, res) {
+                      if (err)
+                        console.log('FCM error:', err);
+
+                      cb(null);
+                    });
+                },
+                function(err) {
+                  callback(err, {message: 'StoreTurn updated', storeTurn: result});
+                });
               });
             });
           });
@@ -158,7 +164,7 @@ module.exports = function(router, mqttClient) {
 
     if (chan === 'aproxTime') {
       //Cada vegada que caesar envia el temps aproximat, actualitzem la store
-      updateStore(id, {aproxTime: parseFloat(message.toString('utf8'))}, function(){}); // Convertim a utf8 el missatge ja que ve del caesar com a un buffer de bytes i el parsejem
+      //updateStore(id, {aproxTime: parseFloat(message.toString('utf8'))}, function(){}); // Convertim a utf8 el missatge ja que ve del caesar com a un buffer de bytes i el parsejem
     }
 
     if (chan === 'advance') {
@@ -247,13 +253,22 @@ module.exports = function(router, mqttClient) {
         mqttClient.publish('etorn/store/' + req.params.store_id + '/usersTurn', '' + disponibleTurn);
 
         getAverageTime(req.params.store_id, function(err, time) {
-          if (time == -1)
-            return; //Si el temps aproximat es -1 (no hi han events en els pasats 15 min) no notifiquem
+          var timeToSend;
 
-          mqttClient.publish('etorn/store/' + req.params.store_id + '/aproxTime', '' + time);
+          if (time != 0 && time != -1) {
+            timeToSend = parseFloat((time).toFixed(1)) * storeQueue;
+            updateStore(req.params.store_id, {aproxTime: timeToSend}, function(){});
+          }
+          //Si el temps aproximat es -1 o 0(no hi han events en els pasats 15 min) notifiquem l'ultim temps aproximat de la store
+          else
+            timeToSend = result.store.aproxTime * storeQueue;
+
+          console.log("storequeue: ", storeQueue);
+
+          mqttClient.publish('etorn/store/' + req.params.store_id + '/aproxTime', '' + timeToSend);
           fcm.FCMNotificationBuilder()
           .setTopic('store.' + req.params.store_id)
-          .addData('aproxTime', parseFloat((time).toFixed(1)) * storeQueue)
+          .addData('aproxTime', timeToSend)
           .send(function(err, res) {
           if (err)
             console.log('FCM error:', err);
