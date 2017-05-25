@@ -33,22 +33,30 @@ var advanceTurn = function (storeID, mqttClient, callback) {
 
     mqttClient.publish('etorn/store/' + storeID + '/storeTurn', '' + result);
 
-    getStoreQueue(storeID, function(err, queue) {
-      if (!err)
-        mqttClient.publish('etorn/store/' + storeID + '/queue', '' + queue);
-    });
-
-    getAverageTime(storeID, function(err, result) {
-      if (!err) {
-        fcm.FCMNotificationBuilder()
-        .setTopic('store.' + storeID)
-        .addData('aproxTime', result)
-        .send(function(err, res) {
-        if (err)
-          console.log('FCM error:', err);
+    _async.waterfall([
+      function(callback) { 
+        getStoreQueue(storeID, function(err, queue) {
+          if (!err)
+            mqttClient.publish('etorn/store/' + storeID + '/queue', '' + queue);
+            callback(err, queue);
         });
       }
+    ], function(err, queue) {
+      getAverageTime(storeID, function(err, time) {
+        if (!err) {
+          fcm.FCMNotificationBuilder()
+          .setTopic('store.' + storeID)
+          .addData('aproxTime', parseFloat((time).toFixed(1)) * queue) // queue -1 perque per alguna rao, si la cua es 5, multiplica per 6
+          .send(function(err, res) {
+          if (err)
+            console.log('FCM error:', err);
+          });
+        }
+      });
     });
+    
+
+    
 
     getStoreById(storeID, function(err, foundStore) {
 
@@ -245,7 +253,7 @@ module.exports = function(router, mqttClient) {
           mqttClient.publish('etorn/store/' + req.params.store_id + '/aproxTime', '' + time);
           fcm.FCMNotificationBuilder()
           .setTopic('store.' + req.params.store_id)
-          .addData('aproxTime', time)
+          .addData('aproxTime', parseFloat((time).toFixed(1)) * storeQueue)
           .send(function(err, res) {
           if (err)
             console.log('FCM error:', err);
