@@ -6,8 +6,8 @@ var resolve = function resolve(str) {
   });
 };
 
-var mongoRoute = resolve('%ProgramFiles%\\MongoDB\\Server\\3.4\\bin\\mongod.exe');
-var dbRoute = resolve('%HOMEPATH%\\Documents\\Programming\\eTorn\\DB');
+var mongoRoute = resolve('%ProgramFiles%\\MongoDB\\Server\\3.4\\bin\\mongod.exe'); //ruta del mongod.exe
+var dbRoute = resolve('%HOMEPATH%\\Documents\\Programming\\eTorn\\DB'); //ruta on es guardara la base de dades
 
 var prc = spawn(mongoRoute,  ['--dbpath', dbRoute]);
 

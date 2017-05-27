@@ -49,12 +49,12 @@ var advanceTurn = function (storeID, mqttClient, callback) {
           if (!err) {
             if (time != 0 && time != -1) {
               timeToSend = parseFloat((time).toFixed(1)) * queue;
-              updateStore(storeID, {aproxTime: timeToSend}, function(){});
+              updateStore(storeID, {aproxTime: time}, function(){});
               console.log("UpdateStore; time: ", parseFloat((time).toFixed(1)) * queue);
             }
-            else {
+            else
               timeToSend = foundStore.aproxTime * queue;
-            }
+
             fcm.FCMNotificationBuilder()
             .setTopic('store.' + storeID)
             .addData('aproxTime', timeToSend)
@@ -125,7 +125,7 @@ var advanceTurn = function (storeID, mqttClient, callback) {
                   if (el.aproxTime != 0 && el.aproxTime != -1)
                     timeToSend = el.aproxTime;
                   else
-                    timeToSend = foundStore.storeTurn * el.queue;
+                    timeToSend = foundStore.aproxTime * el.queue;
 
                   fcmtmp
                     .addData('aproxTime', timeToSend)
@@ -266,7 +266,7 @@ module.exports = function(router, mqttClient) {
 
           if (time != 0 && time != -1) {
             timeToSend = parseFloat((time).toFixed(1)) * storeQueue;
-            updateStore(req.params.store_id, {aproxTime: timeToSend}, function(){});
+            updateStore(req.params.store_id, {aproxTime: time}, function(){});
           }
           //Si el temps aproximat es -1 o 0(no hi han events en els pasats 15 min) notifiquem l'ultim temps aproximat de la store
           else
