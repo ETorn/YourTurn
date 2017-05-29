@@ -56,13 +56,9 @@ module.exports = function(router) {
                 if (data) {
                   turn.aproxTime = data.aproxTime;
                   turn.queue = data.queue;
-
-                  console.log("aproxTimeTurn: ", turn.aproxTime);
-                  console.log("queueTurn: ", turn.queue);
                 }
                   // save the turn and check for errors
                   turn.save(function(err, newTurn) {
-                    console.log("newTurn", newTurn)
                     if (err) {
                       l('Turn save failed: %s', err);
                       return res.json({message: err});

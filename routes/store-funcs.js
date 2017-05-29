@@ -136,49 +136,7 @@ var turnRequest = module.exports.turnRequest = function turnRequest(turn, storeT
           }
         return cb(null, data);
       });
-      //resolve(data);
-  //  });
-  })
-}
-module.exports.notifyUser = function notifyUser(turns, storeTurn, storeId, cb) {
-  var promises = turns.map(function(turn) {
-    var promise = turnRequest(turn, storeTurn);
-    return promise;
-  });
-
-  Promise.all(promises).then(function(data) {
-    console.log("DATA", data);
-
-    data.forEach(function(el){
-
-      //Per cada torn demanat en aquesta parada, avisem a la app que ha de restar -1 a la cua del usuari
-      for (i = 0; i < turns.length; i++) {
-        //mqttClient.publish('etorn/store/' + req.params.store_id + '/user/' + userIds[i] + '/queue');
-        fcm.FCMNotificationBuilder()
-          .setTopic('store.' + req.params.store_id + '.user.' + userIds[i])
-          .addData('storeTurn', 'advance')
-          .addData('queue', turns[i].queue)
-          .send(function(err, res) {
-            if (err)
-              console.log('FCM error:', err);
-          });
-      }
-
-      if (el.userId) {
-        //mqttClient.publish('etorn/store/' + storeId + '/user/' + el + '/notification');
-        console.log("res", el);
-        fcm.FCMNotificationBuilder()
-          .setTopic('store.' + storeId + '.user.' + el.userId)
-          .addData('notification', el.queue) //App decideix quin missatge enviar com a notificacio
-          .send(function(err, res) {
-            if (err)
-              console.log('FCM error:', err);
-          });
-      }
-    });
-
-    cb(null,data);
-  });
+    })
 }
 
 module.exports.getStoreTurns = function getStoreTurns(storeId, cb) {
@@ -195,11 +153,9 @@ module.exports.getStoreTurns = function getStoreTurns(storeId, cb) {
     }
     cb(err,body);
   });
-
 }
 
 var getAverageTime = module.exports.getAverageTime = function getAverageTime(storeId, cb) {
-
   request({
     url: config.caesar.address + "/averageTime/" + storeId,
     method: 'GET',
@@ -361,35 +317,35 @@ module.exports.removeStoreLastTurn = function removeStoreLastTurn (store, cb) {
     return cb(null, "User not found");
 
   _async.waterfall([
-       function(callback) {
-         console.log("userIdFound: ", store.users[0]);
-         request({
-          url: config.node.address + "/users/" + store.users[0],
-          method: 'GET',
-          json: true
-        }, function(err, res, user) {
-          if (err || res.statusCode != 200) {
-            console.log(err);
-            return;
-          }
+     function(callback) {
+       console.log("userIdFound: ", store.users[0]);
+       request({
+        url: config.node.address + "/users/" + store.users[0],
+        method: 'GET',
+        json: true
+      }, function(err, res, user) {
+        if (err || res.statusCode != 200) {
+          console.log(err);
+          return;
+        }
 
-          callback(null, user);
-        });
-       }
-      ], function(err, user) {
-        var userTurnInStore = user.turns.filter(function(el) {return el.storeId == store._id;});
-        request({
-          url: config.node.address + "/turn/" + userTurnInStore[0]._id,
-          method: 'DELETE',
-          json: true
-        }, function(err, res, body) {
-          if (err || res.statusCode != 200) {
-            console.log(err);
-            return;
-          }
-          cb(null, user);
-        });
+        callback(null, user);
       });
+     }
+    ], function(err, user) {
+      var userTurnInStore = user.turns.filter(function(el) {return el.storeId == store._id;});
+      request({
+        url: config.node.address + "/turn/" + userTurnInStore[0]._id,
+        method: 'DELETE',
+        json: true
+      }, function(err, res, body) {
+        if (err || res.statusCode != 200) {
+          console.log(err);
+          return;
+        }
+        cb(null, user);
+      });
+    });
 }
 
 module.exports.removeUserFromStoreQueue = function removeUserFromStoreQueue(uid, sid, cb) {

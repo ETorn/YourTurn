@@ -327,12 +327,3 @@ module.exports = function(router, mqttClient) {
       });
     });
 }
-/* //Avisem a cada usuari que estigui a tants turns de distacia com ha decidit ell a preferencies
-notifyUser(turns, result, req.params.store_id, function(err, res) {
-  //empty
-});*/
-
-/*var lastUserId = foundStore.users[0]; // treiem l'ultim usuari de la cua de torns de la store
-removeUserFromStoreQueue(lastUserId, req.params.store_id, function(err, message){
-  console.log(message);
-});*/
