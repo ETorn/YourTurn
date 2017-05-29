@@ -45,15 +45,17 @@ var advanceTurn = function (storeID, mqttClient, callback) {
       getStoreById(storeID, function(err, foundStore) {
 
         getAverageTime(storeID, function(err, time) {
-          var timeToSend;
           if (!err) {
-            if (time != 0 && time != -1) {
+            var timeToSend;
+
+            if (time != -1 && time != 0)
               timeToSend = parseFloat((time).toFixed(1)) * queue;
-              updateStore(storeID, {aproxTime: time}, function(){});
-              console.log("UpdateStore; time: ", timeToSend);
-            }
             else
-              timeToSend = foundStore.aproxTime * queue;
+              timeToSend = 0;
+
+            updateStore(storeID, {aproxTime: time}, function(){});
+
+            console.log("TimeToSend: ", timeToSend);
 
             fcm.FCMNotificationBuilder()
             .setTopic('store.' + storeID)
@@ -125,9 +127,9 @@ var advanceTurn = function (storeID, mqttClient, callback) {
                   var timeToSend;
 
                   if (el.aproxTime != 0 && el.aproxTime != -1)
-                    timeToSend = el.aproxTime;
+                    timeToSend = el.aproxTime * el.queue;
                   else
-                    timeToSend = foundStore.aproxTime * el.queue;
+                    timeToSend = 0;
 
                   fcmtmp
                     .addData('aproxTime', timeToSend)
@@ -264,19 +266,15 @@ module.exports = function(router, mqttClient) {
         mqttClient.publish('etorn/store/' + req.params.store_id + '/usersTurn', '' + disponibleTurn);
 
         getAverageTime(req.params.store_id, function(err, time) {
+          if (time == -1) //Si el temps aproximat es -1 (no hi han events en els pasats 15 min) no notifiquem
+            return;
+
           var timeToSend;
-
-          if (time != 0 && time != -1) {
-            timeToSend = parseFloat((time).toFixed(1)) * storeQueue;
-            updateStore(req.params.store_id, {aproxTime: time}, function(){});
-          }
-          //Si el temps aproximat es -1 o 0(no hi han events en els pasats 15 min) notifiquem l'ultim temps aproximat de la store
-          else
-            timeToSend = result.store.aproxTime * storeQueue;
-
-          console.log("storequeue: ", storeQueue);
+          timeToSend = parseFloat((time).toFixed(1)) * storeQueue;
+          updateStore(req.params.store_id, {aproxTime: time}, function(){});
 
           mqttClient.publish('etorn/store/' + req.params.store_id + '/aproxTime', '' + timeToSend);
+
           fcm.FCMNotificationBuilder()
           .setTopic('store.' + req.params.store_id)
           .addData('aproxTime', timeToSend)
