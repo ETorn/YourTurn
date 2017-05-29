@@ -11,10 +11,12 @@
             },
             "stores": [
                 {
-                    "name": "Carniceria01"
+                    "name": "Carniceria01",
+                    "screen": "S001"
                 },
                 {
-                    "name": "Peixateria01"
+                    "name": "Peixateria01",
+                    "screen": "S002"
                 }
             ],
             "totems": [
@@ -37,10 +39,12 @@
             },
             "stores": [
                 {
-                    "name": "Carniceria01"
+                    "name": "Carniceria01",
+                    "screen": "S003"
                 },
                 {
-                    "name": "Peixateria01"
+                    "name": "Peixateria01",
+                    "screen": "S004"
                 }
             ],
             "totems": [
@@ -63,10 +67,12 @@
             },
             "stores": [
                 {
-                    "name": "Carniceria01"
+                    "name": "Carniceria01",
+                    "screen": "S005"
                 },
                 {
-                    "name": "Peixateria01"
+                    "name": "Peixateria01",
+                    "screen": "S006"
                 }
             ],
             "totems": [

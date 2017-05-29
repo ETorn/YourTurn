@@ -53,11 +53,29 @@ prc.on('close', function(){
             name: store.name,
             superId: aSuper.id
           }
-        }, function(err, res, body) {
+        }, function(err, res, newStore) {
           if (err || res.statusCode != 200) {
             console.log(err);
             return;
           }
+
+          request({
+            url: config.node.address + "/screens",
+            method: 'POST',
+            json: true,
+            body: {
+              identifier: store.screen,
+              storeId: newStore.storeId
+            }
+          }, function(err, res, body) {
+            if (err || res.statusCode != 200) {
+              console.log(err);
+              return;
+            }
+
+            process.stdout.write('p');
+            
+          });
 
           process.stdout.write('s');
 
