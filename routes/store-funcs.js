@@ -50,6 +50,7 @@ module.exports.newStore = function newStore(obj, cb) {
   store.storeTurn = 1;
   store.usersTurn = 1;
   store.users = [];
+  store.screens = [];
 
   Super.findOne({_id: superId}, 'stores')
   .populate('stores')
@@ -209,7 +210,9 @@ var getAverageTime = module.exports.getAverageTime = function getAverageTime(sto
 }
 
 module.exports.getStoreList = function getStoreList(cb) {
-  Store.find(function(err, stores) {
+  Store.find()
+  .populate('screens')
+  .exec(function(err, stores) {
     if (err)
       return cb(err);
 
