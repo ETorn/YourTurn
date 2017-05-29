@@ -1,8 +1,18 @@
 var geolib = require('geolib');
 var l = require('debug')('etorn:routes:supers');
+var _async = require('async');
+
+var computeStoresQueue = function computeStoresQueue(s) {
+  _async.map(s.stores, function(el, cb) {
+    el.queue = el.users.length;
+    cb(null, el);
+  }, function(err, stores) {
+    s.stores = stores;
+  });
+  return s;
+}
 
 var addDistance = function addDistance(s, req) {
-  var s = s.toObject() || s;
 
   // Si no hi ha coordenades distancia = 0
   if (!req.query.latitude || !req.query.longitude) {
@@ -146,12 +156,13 @@ module.exports = function(router) {
       l('Request for super (%s)', req.params.super_id);
       Super.findById(req.params.super_id)
       .populate('stores')
+      .lean()
       .exec(function(err, superM) {
         if (err) {
           l('Query failed: %s', err);
           return res.send(err);
         }
-        
+        superM = computeStoresQueue(superM);
         res.json(addDistance(superM, req));
       });
     })
