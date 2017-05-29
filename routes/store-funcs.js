@@ -130,10 +130,9 @@ var turnRequest = module.exports.turnRequest = function turnRequest(turn, storeT
       getAverageTime(turn.storeId, function (err, time) {
         if (err)
           return cb(err);
-          if (turn.queue) {
-            // temps aproximat del usuari
-            data.aproxTime = parseFloat((time).toFixed(1)) * (turn.queue - 1); // queue -1 perque per alguna rao, si la cua es 5, multiplica per 6
-          }
+          if (turn.queue)
+            data.aproxTime = time;
+            
         return cb(null, data);
       });
     })

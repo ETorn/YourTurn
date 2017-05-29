@@ -50,7 +50,7 @@ var advanceTurn = function (storeID, mqttClient, callback) {
             if (time != 0 && time != -1) {
               timeToSend = parseFloat((time).toFixed(1)) * queue;
               updateStore(storeID, {aproxTime: time}, function(){});
-              console.log("UpdateStore; time: ", parseFloat((time).toFixed(1)) * queue);
+              console.log("UpdateStore; time: ", timeToSend);
             }
             else
               timeToSend = foundStore.aproxTime * queue;
@@ -62,6 +62,8 @@ var advanceTurn = function (storeID, mqttClient, callback) {
             if (err)
               console.log('FCM error:', err);
             });
+
+            mqttClient.publish('etorn/store/' + storeID + '/aproxTime', '' + timeToSend);
           }
         });
 
