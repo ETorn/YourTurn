@@ -30,12 +30,12 @@
         },
         {
             "city": "Barcelona",
-            "address": "Caprabo Glories",
+            "address": "Biz Barcelona",
             "phone": "123456789",
             "fax": "123456789",
             "location": {
-              "lat": 41.401936,
-              "long": 2.193397
+              "lat": 41.374398,
+              "long": 2.150846
             },
             "stores": [
                 {
@@ -58,12 +58,12 @@
         },
         {
             "city": "Barcelona",
-            "address": "Caprabo Molins de Rei",
+            "address": "Caprabo Glories",
             "phone": "123456789",
             "fax": "123456789",
             "location": {
-              "lat": 41.404626,
-              "long": 2.022925
+              "lat": 41.401936,
+              "long": 2.193397
             },
             "stores": [
                 {
@@ -81,6 +81,34 @@
               },
               {
                 "identifier": "C006"
+              }
+            ]
+        },
+        {
+            "city": "Barcelona",
+            "address": "Caprabo Molins de Rei",
+            "phone": "123456789",
+            "fax": "123456789",
+            "location": {
+              "lat": 41.404626,
+              "long": 2.022925
+            },
+            "stores": [
+                {
+                    "name": "Carniceria01",
+                    "screen": "S007"
+                },
+                {
+                    "name": "Peixateria01",
+                    "screen": "S008"
+                }
+            ],
+            "totems": [
+              {
+                "identifier": "C007"
+              },
+              {
+                "identifier": "C008"
               }
             ]
         }
